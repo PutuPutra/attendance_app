@@ -1,0 +1,16 @@
+[
+  {
+    "id": "1",
+    "username": "admin",
+    "password": "admin",
+    "email": "admin@example.com",
+    "role": "admin"
+  },
+  {
+    "id": "2",
+    "username": "karyawan",
+    "password": "karyawan",
+    "email": "karyawan@example.com",
+    "role": "karyawan"
+  }
+]

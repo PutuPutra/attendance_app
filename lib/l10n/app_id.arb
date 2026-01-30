@@ -1,0 +1,114 @@
+{
+  "appTitle": "Kehadiran Karyawan",
+  "attendance": "Kehadiran",
+  "companyName": "PT. ARRTU PLANTATION",
+  "employee": "Karyawan",
+  "attendanceRecord": "Kehadiran",
+  "checkIn": "Masuk",
+  "breakTime": "Istirahat",
+  "returnToWork": "Kembali",
+  "checkOut": "Keluar",
+  "leave": "Cuti",
+  "settings": "Pengaturan",
+  "settingsTitle": "Pengaturan",
+  "changePassword": "Ubah Kata Sandi",
+  "faceSaved": "Wajah Tersimpan",
+  "getPersonalFaceData": "Dapatkan Data Wajah Pribadi",
+  "clearAllFaceData": "Hapus Semua Data Wajah",
+  "language": "Bahasa",
+  "logout": "Keluar",
+  "version": "Versi 1.0.0",
+  "confirmLogout": "Apakah Anda yakin ingin keluar?",
+  "cancel": "Batal",
+  "ok": "OK",
+  "delete": "Hapus",
+  "confirmDelete": "Apakah Anda yakin ingin menghapus semua data wajah?",
+  "dataDeleted": "Data wajah telah dihapus.",
+  "notImplemented": "Fitur ini belum diimplementasikan.",
+  "theme": "Tema",
+  "lightTheme": "Terang",
+  "darkTheme": "Gelap",
+  "systemTheme": "Sistem",
+  "attendanceHistory": "Riwayat Kehadiran",
+  "liveAttendance": "Kehadiran Langsung",
+  "officeHours": "Jam Kerja",
+  "officeHoursTime": "08:00 - 17:00",
+  "faceScanTitle": "Scan Wajah untuk {type}",
+  "@faceScanTitle": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "pointCameraToFace": "Arahkan kamera ke wajah Anda",
+  "noCameraAvailable": "Tidak ada kamera tersedia.",
+  "cameraInitFailed": "Gagal inisialisasi kamera: {error}",
+  "@cameraInitFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "faceDetectedSuccess": "Wajah terdeteksi! Proses {type} berhasil.",
+  "@faceDetectedSuccess": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "noFaceDetected": "Tidak ada wajah terdeteksi. Coba lagi.",
+  "error": "Error: {error}",
+  "@error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scanFace": "Scan Wajah",
+  "faceDataSection": "Data Wajah",
+  "getSelectedFaceData": "Dapatkan Data Wajah Terpilih",
+  "personalizationSection": "Personalisasi",
+  "themeLabel": "Tema",
+  "languageLabel": "Bahasa",
+  "generalSection": "Umum",
+  "passwordOrBiometric": "Kata sandi atau biometrik",
+  "selectTheme": "Pilih Tema",
+  "selectLanguage": "Pilih Bahasa",
+  "login": "Masuk",
+  "username": "Nama Pengguna",
+  "password": "Kata Sandi",
+  "pleaseEnterUsernameAndPassword": "Silakan masukkan nama pengguna dan kata sandi",
+  "invalidUsernameOrPassword": "Nama pengguna atau kata sandi tidak valid",
+  "loginFailed": "Login gagal: {error}",
+  "@loginFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "userManagement": "Manajemen Pengguna",
+  "manageUsers": "Kelola Pengguna",
+  "deleteUser": "Hapus Pengguna",
+  "confirmDeleteUser": "Apakah Anda yakin ingin menghapus {username}?",
+  "@confirmDeleteUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "editUser": "Edit Pengguna",
+  "addUser": "Tambah Pengguna",
+  "employeeId": "ID Karyawan",
+  "email": "Email",
+  "role": "Peran",
+  "admin": "Admin",
+  "karyawan": "Karyawan",
+  "update": "Perbarui",
+  "allEmployeeHistory": "Riwayat Semua Karyawan"
+}

@@ -1,0 +1,114 @@
+{
+  "appTitle": "Employee Attendance",
+  "attendance": "Attendance",
+  "companyName": "PT. ARRTU PLANTATION",
+  "employee": "Employee",
+  "attendanceRecord": "Attendance",
+  "checkIn": "Check In",
+  "breakTime": "Break",
+  "returnToWork": "Return",
+  "checkOut": "Check Out",
+  "leave": "Leave",
+  "settings": "Settings",
+  "settingsTitle": "Settings",
+  "changePassword": "Change Password",
+  "faceSaved": "Face Saved",
+  "getPersonalFaceData": "Get Personal Face Data",
+  "clearAllFaceData": "Clear All Face Data",
+  "language": "Language",
+  "logout": "Logout",
+  "version": "Version 1.0.0",
+  "confirmLogout": "Are you sure you want to logout?",
+  "cancel": "Cancel",
+  "ok": "OK",
+  "delete": "Delete",
+  "confirmDelete": "Are you sure you want to delete all face data?",
+  "dataDeleted": "Face data has been deleted.",
+  "notImplemented": "This feature is not yet implemented.",
+  "theme": "Theme",
+  "lightTheme": "Light",
+  "darkTheme": "Dark",
+  "systemTheme": "System",
+  "attendanceHistory": "Attendance History",
+  "liveAttendance": "Live Attendance",
+  "officeHours": "Office Hours",
+  "officeHoursTime": "08:00 AM - 05:00 PM",
+  "faceScanTitle": "Face Scan for {type}",
+  "@faceScanTitle": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "pointCameraToFace": "Point the camera at your face",
+  "noCameraAvailable": "No camera available.",
+  "cameraInitFailed": "Failed to initialize camera: {error}",
+  "@cameraInitFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "faceDetectedSuccess": "Face detected! {type} process successful.",
+  "@faceDetectedSuccess": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "noFaceDetected": "No face detected. Please try again.",
+  "error": "Error: {error}",
+  "@error": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "scanFace": "Scan Face",
+  "faceDataSection": "Face Data",
+  "getSelectedFaceData": "Get Data Selected Face",
+  "personalizationSection": "Personalization",
+  "themeLabel": "Theme",
+  "languageLabel": "Language",
+  "generalSection": "General",
+  "passwordOrBiometric": "Password or biometric",
+  "selectTheme": "Select Theme",
+  "selectLanguage": "Select Language",
+  "login": "Login",
+  "username": "Username",
+  "password": "Password",
+  "pleaseEnterUsernameAndPassword": "Please enter username and password",
+  "invalidUsernameOrPassword": "Invalid username or password",
+  "loginFailed": "Login failed: {error}",
+  "@loginFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "userManagement": "User Management",
+  "manageUsers": "Manage Users",
+  "deleteUser": "Delete User",
+  "confirmDeleteUser": "Are you sure you want to delete {username}?",
+  "@confirmDeleteUser": {
+    "placeholders": {
+      "username": {
+        "type": "String"
+      }
+    }
+  },
+  "editUser": "Edit User",
+  "addUser": "Add User",
+  "employeeId": "Employee ID",
+  "email": "Email",
+  "role": "Role",
+  "admin": "Admin",
+  "karyawan": "Employee",
+  "update": "Update",
+  "allEmployeeHistory": "All Employee History"
+}
