@@ -98,7 +98,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Employee Attendance'**
+  /// **'Welcome'**
   String get appTitle;
 
   /// No description provided for @attendance.
@@ -110,7 +110,7 @@ abstract class AppLocalizations {
   /// No description provided for @companyName.
   ///
   /// In en, this message translates to:
-  /// **'PT. ARRTU PLANTATION'**
+  /// **'Login to your account'**
   String get companyName;
 
   /// No description provided for @employee.
@@ -386,7 +386,7 @@ abstract class AppLocalizations {
   /// No description provided for @passwordOrBiometric.
   ///
   /// In en, this message translates to:
-  /// **'Password or biometric'**
+  /// **'Login with biometric'**
   String get passwordOrBiometric;
 
   /// No description provided for @selectTheme.
@@ -418,6 +418,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Password'**
   String get password;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot Password'**
+  String get forgotPassword;
+
+  /// No description provided for @oldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Old Password'**
+  String get oldPassword;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New Password'**
+  String get newPassword;
+
+  /// No description provided for @confirmNewPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm New Password'**
+  String get confirmNewPassword;
+
+  /// No description provided for @passwordsDoNotMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Passwords do not match'**
+  String get passwordsDoNotMatch;
+
+  /// No description provided for @passwordChangedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Password changed successfully'**
+  String get passwordChangedSuccessfully;
+
+  /// No description provided for @incorrectOldPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Incorrect old password'**
+  String get incorrectOldPassword;
 
   /// No description provided for @pleaseEnterUsernameAndPassword.
   ///
@@ -514,6 +556,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All Employee History'**
   String get allEmployeeHistory;
+
+  /// No description provided for @fontStyle.
+  ///
+  /// In en, this message translates to:
+  /// **'Font Style'**
+  String get fontStyle;
+
+  /// No description provided for @systemFont.
+  ///
+  /// In en, this message translates to:
+  /// **'System'**
+  String get systemFont;
+
+  /// No description provided for @appFont.
+  ///
+  /// In en, this message translates to:
+  /// **'App Default'**
+  String get appFont;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

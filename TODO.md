@@ -1,4 +1,0 @@
-- [x] Add import 'dart:async' for Timer
-- [x] Add Timer? \_timer; in \_HomeScreenState
-- [x] In initState, start timer to update every second
-- [x] In dispose, cancel timer

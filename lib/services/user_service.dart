@@ -106,4 +106,23 @@ class UserService {
     final maxId = ids.isEmpty ? 0 : ids.reduce((a, b) => a > b ? a : b);
     return (maxId + 1).toString();
   }
+
+  Future<bool> changePassword(
+    String userId,
+    String oldPassword,
+    String newPassword,
+  ) async {
+    final users = await loadUsers();
+    final index = users.indexWhere((u) => u.id == userId);
+    if (index != -1) {
+      final user = users[index];
+      if (user.password == oldPassword) {
+        final updatedUser = user.copyWith(password: newPassword);
+        users[index] = updatedUser;
+        await saveUsers(users);
+        return true;
+      }
+    }
+    return false;
+  }
 }

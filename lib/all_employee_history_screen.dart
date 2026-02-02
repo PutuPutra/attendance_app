@@ -26,7 +26,7 @@ class _AllEmployeeHistoryScreenState extends State<AllEmployeeHistoryScreen> {
   Future<void> _loadData() async {
     final users = await _userService.loadUsers();
     setState(() {
-      _users = users;
+      _users = users.where((u) => u.role == 'karyawan').toList();
     });
     // For each user, load their attendance history (dummy for now)
     for (var user in _users) {

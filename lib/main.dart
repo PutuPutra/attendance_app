@@ -26,6 +26,8 @@ class _MyAppState extends State<MyApp> {
   Locale? _locale; // null means follow system
   bool _isLoading = true;
   User? _currentUser;
+  bool _biometricEnabled = false;
+  String _fontStyle = 'system';
 
   @override
   void initState() {
@@ -62,6 +64,8 @@ class _MyAppState extends State<MyApp> {
     final themeIndex =
         prefs.getInt('themeMode') ?? 0; // 0: system, 1: light, 2: dark
     final language = prefs.getString('language') ?? 'system';
+    final biometricEnabled = prefs.getBool('biometricEnabled') ?? false;
+    final fontStyle = prefs.getString('fontStyle') ?? 'system';
 
     // Load current user
     final userId = prefs.getString('current_user_id');
@@ -74,6 +78,8 @@ class _MyAppState extends State<MyApp> {
     setState(() {
       _themeMode = ThemeMode.values[themeIndex];
       _currentLanguage = language;
+      _biometricEnabled = biometricEnabled;
+      _fontStyle = fontStyle;
       // If language is 'system', set _locale to null to follow system language
       if (language == 'system') {
         _locale = null;
@@ -134,6 +140,7 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[100],
         cardColor: Colors.white,
+        fontFamily: _fontStyle == 'app' ? 'Roboto' : null,
         textTheme: const TextTheme(
           bodyLarge: TextStyle(color: Colors.white),
           headlineLarge: TextStyle(
@@ -149,6 +156,7 @@ class _MyAppState extends State<MyApp> {
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: Colors.grey[900],
         cardColor: Colors.grey,
+        fontFamily: _fontStyle == 'app' ? 'Roboto' : null,
 
         textTheme: TextTheme(
           bodyLarge: TextStyle(color: Colors.white),
@@ -169,6 +177,7 @@ class _MyAppState extends State<MyApp> {
               currentThemeMode: _themeMode,
               currentLanguage: _currentLanguage,
               currentUser: _currentUser!,
+              biometricEnabled: _biometricEnabled,
             )
           : LoginScreen(
               cameras: cameras!,
@@ -176,6 +185,7 @@ class _MyAppState extends State<MyApp> {
               onLanguageChanged: _saveLanguage,
               currentThemeMode: _themeMode,
               currentLanguage: _currentLanguage,
+              biometricEnabled: _biometricEnabled,
             ),
     );
   }

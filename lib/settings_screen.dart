@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
 import 'user_management_screen.dart';
+import 'services/user_service.dart';
 
 import '../models/user.dart';
 
@@ -32,6 +34,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Additional state for toggles and selections
   bool _biometricEnabled = false; // Toggle for password/biometric
+  late String _selectedFontStyle;
+  final _userService = UserService();
 
   @override
   void initState() {
@@ -47,6 +51,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
       _selectedLanguage = 'System';
     }
     _selectedThemeMode = widget.currentThemeMode;
+    _loadBiometricEnabled();
+    _loadFontStyle();
+  }
+
+  Future<void> _loadBiometricEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _biometricEnabled = prefs.getBool('biometricEnabled') ?? false;
+    });
+  }
+
+  Future<void> _loadFontStyle() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      _selectedFontStyle = prefs.getString('fontStyle') ?? 'system';
+    });
   }
 
   void _changeLanguage(String language) {
@@ -82,6 +102,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
+  void _changeFontStyle(String font) {
+    final prefs = SharedPreferences.getInstance();
+    prefs.then((p) => p.setString('fontStyle', font));
+    setState(() {
+      _selectedFontStyle = font;
+    });
+  }
+
   String get _currentTheme {
     switch (_selectedThemeMode) {
       case ThemeMode.light:
@@ -105,16 +133,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       ),
       body: ListView(
         children: [
-          // Account Section
-          // ListTile(
-          //   title: Text('Akun Sagaku'),
-          //   subtitle: Text(
-          //     'putuputrae@gmail.com',
-          //     style: TextStyle(color: Colors.red[700]),
-          //   ),
-          // ),
           // const Divider(),
-
           // Face Data Section (adding a new section for face-related features)
           Padding(
             padding: const EdgeInsets.symmetric(
@@ -194,6 +213,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
               _showLanguageSelectionDialog(context);
             },
           ),
+          ListTile(
+            title: Text(localizations.fontStyle),
+            subtitle: Text(
+              _selectedFontStyle == 'system'
+                  ? localizations.systemFont
+                  : localizations.appFont,
+              style: TextStyle(color: Colors.red[700]),
+            ),
+            onTap: () {
+              _showFontStyleSelectionDialog(context);
+            },
+          ),
           const Divider(),
 
           // General Section
@@ -218,7 +249,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           SwitchListTile(
             title: Text(localizations.passwordOrBiometric),
             value: _biometricEnabled,
-            onChanged: (bool value) {
+            onChanged: (bool value) async {
+              final prefs = await SharedPreferences.getInstance();
+              await prefs.setBool('biometricEnabled', value);
               setState(() {
                 _biometricEnabled = value;
               });
@@ -235,6 +268,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
             ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -302,18 +336,128 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showChangePasswordDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final oldPasswordController = TextEditingController();
+    final newPasswordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+    bool isLoading = false;
+
     showDialog(
       context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text(localizations.changePassword),
-          content: Text(localizations.notImplemented),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizations.ok),
-            ),
-          ],
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text(localizations.changePassword),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextField(
+                    controller: oldPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: localizations.oldPassword,
+                    ),
+                  ),
+                  TextField(
+                    controller: newPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: localizations.newPassword,
+                    ),
+                  ),
+                  TextField(
+                    controller: confirmPasswordController,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                      labelText: localizations.confirmNewPassword,
+                    ),
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(localizations.cancel),
+                ),
+                TextButton(
+                  onPressed: isLoading
+                      ? null
+                      : () async {
+                          final oldPassword = oldPasswordController.text.trim();
+                          final newPassword = newPasswordController.text.trim();
+                          final confirmPassword = confirmPasswordController.text
+                              .trim();
+
+                          if (oldPassword.isEmpty ||
+                              newPassword.isEmpty ||
+                              confirmPassword.isEmpty) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  localizations.pleaseEnterUsernameAndPassword,
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          if (newPassword != confirmPassword) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  localizations.passwordsDoNotMatch,
+                                ),
+                              ),
+                            );
+                            return;
+                          }
+
+                          setState(() {
+                            isLoading = true;
+                          });
+
+                          try {
+                            final success = await _userService.changePassword(
+                              widget.currentUser.id,
+                              oldPassword,
+                              newPassword,
+                            );
+
+                            if (success) {
+                              Navigator.of(dialogContext).pop();
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    localizations.passwordChangedSuccessfully,
+                                  ),
+                                ),
+                              );
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    localizations.incorrectOldPassword,
+                                  ),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          } finally {
+                            setState(() {
+                              isLoading = false;
+                            });
+                          }
+                        },
+                  child: isLoading
+                      ? const CircularProgressIndicator()
+                      : Text(localizations.ok),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -400,6 +544,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(localizations.delete),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showFontStyleSelectionDialog(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Select Font Style'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: ['system', 'app'].map((font) {
+              return RadioListTile<String>(
+                title: Text(
+                  font == 'system'
+                      ? localizations.systemFont
+                      : localizations.appFont,
+                ),
+                value: font,
+                groupValue: _selectedFontStyle,
+                onChanged: (String? value) {
+                  if (value != null) {
+                    _changeFontStyle(value);
+                    Navigator.of(context).pop();
+                  }
+                },
+              );
+            }).toList(),
+          ),
         );
       },
     );

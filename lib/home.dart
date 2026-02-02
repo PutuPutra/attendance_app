@@ -20,6 +20,7 @@ class HomeScreen extends StatefulWidget {
   final ThemeMode currentThemeMode;
   final String currentLanguage;
   final User currentUser;
+  final bool biometricEnabled;
 
   const HomeScreen({
     super.key,
@@ -29,6 +30,7 @@ class HomeScreen extends StatefulWidget {
     required this.currentThemeMode,
     required this.currentLanguage,
     required this.currentUser,
+    required this.biometricEnabled,
   });
 
   @override
@@ -73,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
           onLanguageChanged: widget.onLanguageChanged,
           currentThemeMode: widget.currentThemeMode,
           currentLanguage: widget.currentLanguage,
+          biometricEnabled: widget.biometricEnabled,
         ),
       ),
       (route) => false,

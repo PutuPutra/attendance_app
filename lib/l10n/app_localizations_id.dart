@@ -9,13 +9,13 @@ class AppLocalizationsId extends AppLocalizations {
   AppLocalizationsId([String locale = 'id']) : super(locale);
 
   @override
-  String get appTitle => 'Kehadiran Karyawan';
+  String get appTitle => 'Selamat Datang';
 
   @override
   String get attendance => 'Kehadiran';
 
   @override
-  String get companyName => 'PT. ARRTU PLANTATION';
+  String get companyName => 'Masuk ke akun Anda';
 
   @override
   String get employee => 'Karyawan';
@@ -161,7 +161,7 @@ class AppLocalizationsId extends AppLocalizations {
   String get generalSection => 'Umum';
 
   @override
-  String get passwordOrBiometric => 'Kata sandi atau biometrik';
+  String get passwordOrBiometric => 'Masuk dengan biometrik';
 
   @override
   String get selectTheme => 'Pilih Tema';
@@ -177,6 +177,27 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get password => 'Kata Sandi';
+
+  @override
+  String get forgotPassword => 'Lupa Kata Sandi';
+
+  @override
+  String get oldPassword => 'Kata Sandi Lama';
+
+  @override
+  String get newPassword => 'Kata Sandi Baru';
+
+  @override
+  String get confirmNewPassword => 'Konfirmasi Kata Sandi Baru';
+
+  @override
+  String get passwordsDoNotMatch => 'Kata sandi tidak cocok';
+
+  @override
+  String get passwordChangedSuccessfully => 'Kata sandi berhasil diubah';
+
+  @override
+  String get incorrectOldPassword => 'Kata sandi lama salah';
 
   @override
   String get pleaseEnterUsernameAndPassword => 'Silakan masukkan nama pengguna dan kata sandi';
@@ -229,4 +250,13 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get allEmployeeHistory => 'Riwayat Semua Karyawan';
+
+  @override
+  String get fontStyle => 'Gaya Font';
+
+  @override
+  String get systemFont => 'Sistem';
+
+  @override
+  String get appFont => 'Bawaan Aplikasi';
 }

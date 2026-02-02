@@ -9,13 +9,13 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Employee Attendance';
+  String get appTitle => 'Welcome';
 
   @override
   String get attendance => 'Attendance';
 
   @override
-  String get companyName => 'PT. ARRTU PLANTATION';
+  String get companyName => 'Login to your account';
 
   @override
   String get employee => 'Employee';
@@ -161,7 +161,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get generalSection => 'General';
 
   @override
-  String get passwordOrBiometric => 'Password or biometric';
+  String get passwordOrBiometric => 'Login with biometric';
 
   @override
   String get selectTheme => 'Select Theme';
@@ -177,6 +177,27 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get password => 'Password';
+
+  @override
+  String get forgotPassword => 'Forgot Password';
+
+  @override
+  String get oldPassword => 'Old Password';
+
+  @override
+  String get newPassword => 'New Password';
+
+  @override
+  String get confirmNewPassword => 'Confirm New Password';
+
+  @override
+  String get passwordsDoNotMatch => 'Passwords do not match';
+
+  @override
+  String get passwordChangedSuccessfully => 'Password changed successfully';
+
+  @override
+  String get incorrectOldPassword => 'Incorrect old password';
 
   @override
   String get pleaseEnterUsernameAndPassword => 'Please enter username and password';
@@ -229,4 +250,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get allEmployeeHistory => 'All Employee History';
+
+  @override
+  String get fontStyle => 'Font Style';
+
+  @override
+  String get systemFont => 'System';
+
+  @override
+  String get appFont => 'App Default';
 }

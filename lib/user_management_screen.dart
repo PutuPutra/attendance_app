@@ -23,7 +23,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
   Future<void> _loadUsers() async {
     final users = await _userService.loadUsers();
     setState(() {
-      _users = users;
+      _users = users.where((u) => u.role == 'karyawan').toList();
     });
   }
 
@@ -80,7 +80,6 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
       text: user?.password ?? '',
     );
     final emailController = TextEditingController(text: user?.email ?? '');
-    String selectedRole = user?.role ?? 'karyawan';
 
     return showDialog<User>(
       context: context,
@@ -110,24 +109,11 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 controller: emailController,
                 decoration: InputDecoration(labelText: localizations.email),
               ),
-              DropdownButtonFormField<String>(
-                value: selectedRole,
+
+              TextField(
+                controller: TextEditingController(text: localizations.karyawan),
                 decoration: InputDecoration(labelText: localizations.role),
-                items: [
-                  DropdownMenuItem(
-                    value: 'admin',
-                    child: Text(localizations.admin),
-                  ),
-                  DropdownMenuItem(
-                    value: 'karyawan',
-                    child: Text(localizations.karyawan),
-                  ),
-                ],
-                onChanged: (value) {
-                  if (value != null) {
-                    selectedRole = value;
-                  }
-                },
+                enabled: false,
               ),
             ],
           ),
@@ -144,7 +130,7 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 username: usernameController.text.trim(),
                 password: passwordController.text.trim(),
                 email: emailController.text.trim(),
-                role: selectedRole,
+                role: 'karyawan',
               );
               Navigator.of(context).pop(newUser);
             },
