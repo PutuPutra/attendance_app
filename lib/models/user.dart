@@ -4,6 +4,7 @@ class User {
   final String password;
   final String email;
   final String role;
+  final String? faceImagePath;
 
   User({
     required this.id,
@@ -11,6 +12,7 @@ class User {
     required this.password,
     required this.email,
     required this.role,
+    this.faceImagePath,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -20,6 +22,7 @@ class User {
       password: json['password'],
       email: json['email'],
       role: json['role'],
+      faceImagePath: json['faceImagePath'],
     );
   }
 
@@ -30,6 +33,7 @@ class User {
       'password': password,
       'email': email,
       'role': role,
+      'faceImagePath': faceImagePath,
     };
   }
 
@@ -39,6 +43,7 @@ class User {
     String? password,
     String? email,
     String? role,
+    String? faceImagePath,
   }) {
     return User(
       id: id ?? this.id,
@@ -46,6 +51,7 @@ class User {
       password: password ?? this.password,
       email: email ?? this.email,
       role: role ?? this.role,
+      faceImagePath: faceImagePath ?? this.faceImagePath,
     );
   }
 }

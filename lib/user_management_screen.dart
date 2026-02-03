@@ -4,7 +4,9 @@ import 'models/user.dart';
 import 'services/user_service.dart';
 
 class UserManagementScreen extends StatefulWidget {
-  const UserManagementScreen({super.key});
+  final User currentUser;
+
+  const UserManagementScreen({super.key, required this.currentUser});
 
   @override
   State<UserManagementScreen> createState() => _UserManagementScreenState();
@@ -100,16 +102,18 @@ class _UserManagementScreenState extends State<UserManagementScreen> {
                 controller: usernameController,
                 decoration: InputDecoration(labelText: localizations.username),
               ),
-              TextField(
-                controller: passwordController,
-                decoration: InputDecoration(labelText: localizations.password),
-                obscureText: true,
-              ),
+              if (widget.currentUser.role != 'admin')
+                TextField(
+                  controller: passwordController,
+                  decoration: InputDecoration(
+                    labelText: localizations.password,
+                  ),
+                  obscureText: true,
+                ),
               TextField(
                 controller: emailController,
                 decoration: InputDecoration(labelText: localizations.email),
               ),
-
               TextField(
                 controller: TextEditingController(text: localizations.karyawan),
                 decoration: InputDecoration(labelText: localizations.role),

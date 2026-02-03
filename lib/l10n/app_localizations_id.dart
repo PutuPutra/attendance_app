@@ -24,16 +24,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get attendanceRecord => 'Kehadiran';
 
   @override
-  String get checkIn => 'Masuk';
+  String get checkIn => 'Masuk Kerja';
 
   @override
-  String get breakTime => 'Istirahat';
+  String get breakTime => 'Jam Istirahat';
 
   @override
-  String get returnToWork => 'Kembali';
+  String get returnToWork => 'Kembali Kerja';
 
   @override
-  String get checkOut => 'Keluar';
+  String get checkOut => 'Pulang Kerja';
 
   @override
   String get leave => 'Cuti';
@@ -259,4 +259,25 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get appFont => 'Bawaan Aplikasi';
+
+  @override
+  String get selectDateRangeTitle => 'Pilih Rentang Waktu untuk Menampilkan Riwayat kehadiran';
+
+  @override
+  String get selectStartDate => 'Pilih Tanggal Mulai';
+
+  @override
+  String get selectEndDate => 'Pilih Tanggal Akhir';
+
+  @override
+  String get startLabel => 'Mulai: ';
+
+  @override
+  String get endLabel => 'Akhir: ';
+
+  @override
+  String get pleaseSelectBothDates => 'Silakan pilih tanggal mulai dan akhir';
+
+  @override
+  String get apply => 'Terapkan';
 }

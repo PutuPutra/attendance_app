@@ -120,5 +120,12 @@
   "allEmployeeHistory": "All Employee History",
   "fontStyle": "Font Style",
   "systemFont": "System",
-  "appFont": "App Default"
+  "appFont": "App Default",
+  "selectDateRangeTitle": "Select Date Range for Attendance History",
+  "selectStartDate": "Select Start Date",
+  "selectEndDate": "Select End Date",
+  "startLabel": "Start: ",
+  "endLabel": "End: ",
+  "pleaseSelectBothDates": "Please select both start and end dates",
+  "apply": "Apply"
 }

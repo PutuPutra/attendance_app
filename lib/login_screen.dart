@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -5,6 +6,7 @@ import 'package:local_auth/local_auth.dart';
 import 'models/user.dart';
 import 'services/user_service.dart';
 import 'home.dart';
+import 'settings_screen.dart';
 import 'l10n/app_localizations.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -29,14 +31,23 @@ class LoginScreen extends StatefulWidget {
   State<LoginScreen> createState() => _LoginScreenState();
 }
 
+enum ForgotPasswordStep { username, code, password }
+
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _usernameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _forgotUsernameController = TextEditingController();
+  final _codeController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   final _userService = UserService();
   final LocalAuthentication _localAuth = LocalAuthentication();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
+  bool _isCountdown = false;
+  int _countdown = 0;
+  Timer? _countdownTimer;
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
 
@@ -57,6 +68,11 @@ class _LoginScreenState extends State<LoginScreen>
   void dispose() {
     _usernameController.dispose();
     _passwordController.dispose();
+    _forgotUsernameController.dispose();
+    _codeController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
+    _countdownTimer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -125,22 +141,45 @@ class _LoginScreenState extends State<LoginScreen>
         await prefs.setString('current_user_email', user.email);
         await prefs.setString('current_user_role', user.role);
 
-        // Navigate to AttendanceScreen
-        if (mounted) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (_) => HomeScreen(
-                cameras: widget.cameras,
-                onThemeChanged: widget.onThemeChanged,
-                onLanguageChanged: widget.onLanguageChanged,
-                currentThemeMode: widget.currentThemeMode,
-                currentLanguage: widget.currentLanguage,
-                currentUser: user!,
-                biometricEnabled: widget.biometricEnabled,
+        // Check if just reset password
+        final justReset = prefs.getBool('just_reset_password') ?? false;
+        if (justReset) {
+          // Keep the flag for HomeScreen to handle
+          // Navigate to HomeScreen, which will then push Settings
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => HomeScreen(
+                  cameras: widget.cameras,
+                  onThemeChanged: widget.onThemeChanged,
+                  onLanguageChanged: widget.onLanguageChanged,
+                  currentThemeMode: widget.currentThemeMode,
+                  currentLanguage: widget.currentLanguage,
+                  currentUser: user!,
+                  biometricEnabled: widget.biometricEnabled,
+                ),
               ),
-            ),
-          );
+            );
+          }
+        } else {
+          // Navigate to HomeScreen
+          if (mounted) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (_) => HomeScreen(
+                  cameras: widget.cameras,
+                  onThemeChanged: widget.onThemeChanged,
+                  onLanguageChanged: widget.onLanguageChanged,
+                  currentThemeMode: widget.currentThemeMode,
+                  currentLanguage: widget.currentLanguage,
+                  currentUser: user!,
+                  biometricEnabled: widget.biometricEnabled,
+                ),
+              ),
+            );
+          }
         }
       } else {
         messenger.showSnackBar(
@@ -171,6 +210,50 @@ class _LoginScreenState extends State<LoginScreen>
     final currentIndex = languages.indexOf(widget.currentLanguage);
     final nextIndex = (currentIndex + 1) % languages.length;
     widget.onLanguageChanged(languages[nextIndex]);
+  }
+
+  void _showForgotPasswordDialog() {
+    if (_isCountdown) return; // Prevent multiple taps
+
+    final username = _usernameController.text.trim();
+    if (username.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Please enter username first')));
+      return;
+    }
+
+    _userService
+        .sendResetCode(username)
+        .then((code) {
+          setState(() {
+            _passwordController.text = code;
+            _isCountdown = true;
+            _countdown = 60;
+          });
+          _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+            setState(() {
+              _countdown--;
+              if (_countdown <= 0) {
+                _countdownTimer?.cancel();
+                _isCountdown = false;
+                _passwordController.clear();
+              }
+            });
+          });
+        })
+        .catchError((e) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text(e.toString())));
+        });
+  }
+
+  void _clearControllers() {
+    _forgotUsernameController.clear();
+    _codeController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
   }
 
   @override
@@ -273,11 +356,11 @@ class _LoginScreenState extends State<LoginScreen>
                         Align(
                           alignment: Alignment.centerRight,
                           child: TextButton(
-                            onPressed: () {
-                              // TODO: Implement forgot password logic
-                            },
+                            onPressed: _showForgotPasswordDialog,
                             child: Text(
-                              localizations.forgotPassword,
+                              _isCountdown
+                                  ? '$_countdown detik'
+                                  : localizations.forgotPassword,
                               style: const TextStyle(fontSize: 14),
                             ),
                           ),

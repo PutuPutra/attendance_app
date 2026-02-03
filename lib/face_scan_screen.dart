@@ -1,13 +1,22 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
 import 'l10n/app_localizations.dart';
+import '../models/user.dart';
+import '../services/user_service.dart';
 
 class FaceScanScreen extends StatefulWidget {
   final String type;
   final List<CameraDescription> cameras;
+  final User currentUser;
 
-  const FaceScanScreen({super.key, required this.type, required this.cameras});
+  const FaceScanScreen({
+    super.key,
+    required this.type,
+    required this.cameras,
+    required this.currentUser,
+  });
 
   @override
   State<FaceScanScreen> createState() => _FaceScanScreenState();
@@ -25,10 +34,12 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
   bool _isDetecting = false;
   String? _status;
   String? _errorMessage;
+  late bool isRegistration;
 
   @override
   void initState() {
     super.initState();
+    isRegistration = widget.currentUser.faceImagePath == null;
     _initCamera();
   }
 
@@ -61,28 +72,49 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
 
   Future<void> _detectFaces(BuildContext context) async {
     if (_isDetecting || _controller == null) return;
-    _isDetecting = true;
+    setState(() {
+      _isDetecting = true;
+    });
 
     final localizations = AppLocalizations.of(context)!;
+    final userService = UserService();
 
     try {
       final image = await _controller!.takePicture();
       final inputImage = InputImage.fromFilePath(image.path);
       final faces = await _faceDetector.processImage(inputImage);
 
-      setState(() {
-        if (faces.isNotEmpty) {
-          _status = localizations.faceDetectedSuccess(widget.type);
+      if (faces.isNotEmpty) {
+        if (isRegistration) {
+          final filePath = await userService.saveFaceImage(
+            widget.currentUser.id,
+            File(image.path),
+          );
+          final updatedUser = widget.currentUser.copyWith(
+            faceImagePath: filePath,
+          );
+          await userService.updateUser(widget.currentUser.id, updatedUser);
+          setState(() {
+            _status = 'Face registered successfully';
+            _isDetecting = false;
+          });
         } else {
-          _status = localizations.noFaceDetected;
+          setState(() {
+            _status = 'Face detected for attendance';
+            _isDetecting = false;
+          });
         }
-      });
+      } else {
+        setState(() {
+          _status = localizations.noFaceDetected;
+          _isDetecting = false;
+        });
+      }
     } catch (e) {
       setState(() {
         _status = localizations.error(e.toString());
+        _isDetecting = false;
       });
-    } finally {
-      _isDetecting = false;
     }
   }
 
@@ -132,8 +164,12 @@ class _FaceScanScreenState extends State<FaceScanScreen> {
                         ),
                       ),
                       ElevatedButton(
-                        onPressed: () => _detectFaces(context),
-                        child: Text(localizations.scanFace),
+                        onPressed: () async => await _detectFaces(context),
+                        child: Text(
+                          isRegistration
+                              ? 'Register Face'
+                              : localizations.scanFace,
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],

@@ -171,13 +171,17 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
   }
 
   void _showDateRangePicker() {
+    final localizations = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return StatefulBuilder(
           builder: (context, setState) {
             return AlertDialog(
-              title: const Text('Filter by Date Range'),
+              title: Text(
+                localizations.selectDateRangeTitle,
+                style: const TextStyle(fontSize: 16),
+              ),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
@@ -197,8 +201,8 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
                     },
                     child: Text(
                       _selectedStartDate == null
-                          ? 'Select Start Date'
-                          : 'Start: ${DateFormat('dd/MM/yyyy').format(_selectedStartDate!)}',
+                          ? localizations.selectStartDate
+                          : '${localizations.startLabel}${DateFormat('dd/MM/yyyy').format(_selectedStartDate!)}',
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -218,8 +222,8 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
                     },
                     child: Text(
                       _selectedEndDate == null
-                          ? 'Select End Date'
-                          : 'End: ${DateFormat('dd/MM/yyyy').format(_selectedEndDate!)}',
+                          ? localizations.selectEndDate
+                          : '${localizations.endLabel}${DateFormat('dd/MM/yyyy').format(_selectedEndDate!)}',
                     ),
                   ),
                 ],
@@ -229,7 +233,7 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text('Cancel'),
+                  child: Text(localizations.cancel),
                 ),
                 TextButton(
                   onPressed: () {
@@ -244,15 +248,13 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
                       Navigator.of(context).pop();
                     } else {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text(
-                            'Please select both start and end dates',
-                          ),
+                        SnackBar(
+                          content: Text(localizations.pleaseSelectBothDates),
                         ),
                       );
                     }
                   },
-                  child: const Text('Apply'),
+                  child: Text(localizations.apply),
                 ),
               ],
             );
@@ -390,8 +392,8 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
         final entry = _attendanceHistory[index];
         final date = entry['date'] as DateTime;
         final formattedDate = DateFormat(
-          'EEE, dd/MM/yyyy',
-          locale,
+          'EEE, dd MMMM yyyy',
+          'id',
         ).format(date);
         final status = entry['status'] as String;
 
@@ -418,44 +420,65 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
         final returnColor = onSurfaceColor;
         final checkOutColor = onSurfaceColor;
 
-        return ListTile(
-          tileColor: isDarkMode ? Colors.transparent : Colors.grey[100],
-          contentPadding: EdgeInsets.zero,
-          leading: Icon(icon, color: iconColor, size: 20),
-          title: Text(
-            formattedDate,
-            style: TextStyle(color: onSurfaceColor, fontSize: 14),
-          ),
-          trailing: RichText(
-            text: TextSpan(
+        return Card(
+          color: isDarkMode ? Colors.grey[800] : Colors.grey[100],
+          margin: const EdgeInsets.symmetric(vertical: 4.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TextSpan(
-                  text: checkInTime,
-                  style: TextStyle(color: checkInColor, fontSize: 14),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      formattedDate,
+                      style: TextStyle(
+                        color: onSurfaceColor,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Icon(icon, color: iconColor, size: 24),
+                  ],
                 ),
-                TextSpan(
-                  text: ' - ',
-                  style: TextStyle(color: onSurfaceColor, fontSize: 14),
-                ),
-                TextSpan(
-                  text: breakTime,
-                  style: TextStyle(color: breakColor, fontSize: 14),
-                ),
-                TextSpan(
-                  text: ' - ',
-                  style: TextStyle(color: onSurfaceColor, fontSize: 14),
-                ),
-                TextSpan(
-                  text: returnTime,
-                  style: TextStyle(color: returnColor, fontSize: 14),
-                ),
-                TextSpan(
-                  text: ' - ',
-                  style: TextStyle(color: onSurfaceColor, fontSize: 14),
-                ),
-                TextSpan(
-                  text: checkOutTime,
-                  style: TextStyle(color: checkOutColor, fontSize: 14),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Masuk: $checkInTime',
+                            style: TextStyle(color: checkInColor, fontSize: 12),
+                          ),
+                          Text(
+                            'Istirahat: $breakTime',
+                            style: TextStyle(color: breakColor, fontSize: 12),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Kembali: $returnTime',
+                            style: TextStyle(color: returnColor, fontSize: 12),
+                          ),
+                          Text(
+                            'Pulang: $checkOutTime',
+                            style: TextStyle(
+                              color: checkOutColor,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

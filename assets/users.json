@@ -3,14 +3,14 @@
     "id": "1",
     "username": "admin",
     "password": "admin",
-    "email": "admin@example.com",
+    "email": "persada.chatgpt@gmail.com",
     "role": "admin"
   },
   {
     "id": "2",
     "username": "karyawan",
     "password": "karyawan",
-    "email": "karyawan@example.com",
+    "email": "icamstudioofficial@gmail.com",
     "role": "karyawan"
   }
 ]

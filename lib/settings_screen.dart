@@ -12,6 +12,7 @@ class SettingsScreen extends StatefulWidget {
   final ThemeMode currentThemeMode;
   final String currentLanguage;
   final User currentUser;
+  final bool openChangePasswordDialog;
 
   const SettingsScreen({
     super.key,
@@ -20,6 +21,7 @@ class SettingsScreen extends StatefulWidget {
     required this.currentThemeMode,
     required this.currentLanguage,
     required this.currentUser,
+    this.openChangePasswordDialog = false,
   });
 
   @override
@@ -30,7 +32,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String _selectedLanguage;
   late ThemeMode _selectedThemeMode;
   final List<String> _languages = ['System', 'Indonesia', 'English'];
-  final List<String> _themeOptions = ['System', 'Light', 'Dark'];
 
   // Additional state for toggles and selections
   bool _biometricEnabled = false; // Toggle for password/biometric
@@ -53,6 +54,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _selectedThemeMode = widget.currentThemeMode;
     _loadBiometricEnabled();
     _loadFontStyle();
+    if (widget.openChangePasswordDialog) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _showChangePasswordDialog(context);
+      });
+    }
   }
 
   Future<void> _loadBiometricEnabled() async {
@@ -67,6 +73,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _selectedFontStyle = prefs.getString('fontStyle') ?? 'system';
     });
+  }
+
+  String _getThemeKey(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'light';
+      case ThemeMode.dark:
+        return 'dark';
+      default:
+        return 'system';
+    }
+  }
+
+  String _getLocalizedTheme(String key, AppLocalizations localizations) {
+    switch (key) {
+      case 'light':
+        return localizations.lightTheme;
+      case 'dark':
+        return localizations.darkTheme;
+      default:
+        return localizations.systemTheme;
+    }
   }
 
   void _changeLanguage(String language) {
@@ -84,13 +112,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     });
   }
 
-  void _changeTheme(String theme) {
+  void _changeTheme(String key) {
     ThemeMode mode;
-    switch (theme) {
-      case 'Light':
+    switch (key) {
+      case 'light':
         mode = ThemeMode.light;
         break;
-      case 'Dark':
+      case 'dark':
         mode = ThemeMode.dark;
         break;
       default:
@@ -108,17 +136,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {
       _selectedFontStyle = font;
     });
-  }
-
-  String get _currentTheme {
-    switch (_selectedThemeMode) {
-      case ThemeMode.light:
-        return 'Terang';
-      case ThemeMode.dark:
-        return 'Gelap';
-      default:
-        return 'System';
-    }
   }
 
   @override
@@ -196,7 +213,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ListTile(
             title: Text(localizations.themeLabel),
             subtitle: Text(
-              _currentTheme,
+              _getLocalizedTheme(
+                _getThemeKey(_selectedThemeMode),
+                localizations,
+              ),
               style: TextStyle(color: Colors.red[700]),
             ),
             onTap: () {
@@ -276,6 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showThemeSelectionDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
+    final List<String> themeKeys = ['system', 'light', 'dark'];
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -283,15 +304,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
           title: Text(localizations.selectTheme),
           content: Column(
             mainAxisSize: MainAxisSize.min,
-            children: _themeOptions.map((theme) {
+            children: themeKeys.map((key) {
               return RadioListTile<String>(
-                title: Text(theme),
-                value: theme,
-                groupValue: _currentTheme == 'Terang'
-                    ? 'Light'
-                    : _currentTheme == 'Gelap'
-                    ? 'Dark'
-                    : 'System',
+                title: Text(_getLocalizedTheme(key, localizations)),
+                value: key,
+                groupValue: _getThemeKey(_selectedThemeMode),
                 onChanged: (String? value) {
                   if (value != null) {
                     _changeTheme(value);
@@ -336,7 +353,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _showChangePasswordDialog(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final oldPasswordController = TextEditingController();
     final newPasswordController = TextEditingController();
     final confirmPasswordController = TextEditingController();
     bool isLoading = false;
@@ -351,13 +367,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  TextField(
-                    controller: oldPasswordController,
-                    obscureText: true,
-                    decoration: InputDecoration(
-                      labelText: localizations.oldPassword,
-                    ),
-                  ),
                   TextField(
                     controller: newPasswordController,
                     obscureText: true,
@@ -383,14 +392,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   onPressed: isLoading
                       ? null
                       : () async {
-                          final oldPassword = oldPasswordController.text.trim();
                           final newPassword = newPasswordController.text.trim();
                           final confirmPassword = confirmPasswordController.text
                               .trim();
 
-                          if (oldPassword.isEmpty ||
-                              newPassword.isEmpty ||
-                              confirmPassword.isEmpty) {
+                          if (newPassword.isEmpty || confirmPassword.isEmpty) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(
@@ -419,7 +425,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           try {
                             final success = await _userService.changePassword(
                               widget.currentUser.id,
-                              oldPassword,
                               newPassword,
                             );
 
@@ -435,9 +440,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             } else {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(
-                                    localizations.incorrectOldPassword,
-                                  ),
+                                  content: Text('Failed to change password'),
                                 ),
                               );
                             }

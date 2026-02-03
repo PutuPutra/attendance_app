@@ -55,6 +55,28 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.currentUser.role == 'admin') {
       _loadAllUsers();
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final justReset = prefs.getBool('just_reset_password') ?? false;
+      if (justReset) {
+        await prefs.remove('just_reset_password');
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => SettingsScreen(
+                onThemeChanged: widget.onThemeChanged,
+                onLanguageChanged: widget.onLanguageChanged,
+                currentThemeMode: widget.currentThemeMode,
+                currentLanguage: widget.currentLanguage,
+                currentUser: widget.currentUser,
+                openChangePasswordDialog: true,
+              ),
+            ),
+          );
+        }
+      }
+    });
   }
 
   @override
@@ -79,6 +101,42 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
       (route) => false,
+    );
+  }
+
+  void _showLogoutConfirmation() {
+    final localizations = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.logout, color: Colors.red),
+              const SizedBox(width: 8),
+              Text(localizations.logout),
+            ],
+          ),
+          content: Text(localizations.confirmLogout),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(localizations.cancel),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                _logout();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: Text(localizations.ok),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -135,9 +193,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   children: [
                     const CircleAvatar(
                       radius: 20,
-                      backgroundImage: AssetImage(
-                        'assets/profile_placeholder.png',
-                      ),
+                      child: Icon(Icons.person, color: Colors.white),
                     ),
                     const SizedBox(width: 8),
                     Column(
@@ -180,7 +236,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.logout, color: Colors.white),
-                      onPressed: _logout,
+                      onPressed: _showLogoutConfirmation,
                     ),
                   ],
                 ),
@@ -229,16 +285,35 @@ class _HomeScreenState extends State<HomeScreen> {
                           style: TextStyle(color: onSurfaceColor, fontSize: 16),
                         ),
                         const SizedBox(height: 16),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        GridView.count(
+                          crossAxisCount: 2,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          childAspectRatio:
+                              4.0, // Make buttons slimmer (wider than tall)
+                          mainAxisSpacing: 8.0,
+                          crossAxisSpacing: 8.0,
                           children: [
-                            _buildButton(localizations.checkIn, Colors.blue),
-                            _buildButton(localizations.breakTime, Colors.blue),
                             _buildButton(
+                              context,
+                              localizations.checkIn,
+                              Colors.blue,
+                            ),
+                            _buildButton(
+                              context,
+                              localizations.breakTime,
+                              Colors.blue,
+                            ),
+                            _buildButton(
+                              context,
                               localizations.returnToWork,
                               Colors.blue,
                             ),
-                            _buildButton(localizations.checkOut, Colors.blue),
+                            _buildButton(
+                              context,
+                              localizations.checkOut,
+                              Colors.blue,
+                            ),
                           ],
                         ),
                       ],
@@ -272,8 +347,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (_) =>
-                                              const UserManagementScreen(),
+                                          builder: (_) => UserManagementScreen(
+                                            currentUser: widget.currentUser,
+                                          ),
                                         ),
                                       );
                                     },
@@ -288,10 +364,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            'User Management',
+                                            localizations.userManagement,
                                             style: TextStyle(
                                               color: onSurfaceColor,
-                                              fontSize: 16,
+                                              fontSize: 14,
                                               fontWeight: FontWeight.bold,
                                             ),
                                             textAlign: TextAlign.center,
@@ -333,10 +409,10 @@ class _HomeScreenState extends State<HomeScreen> {
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
-                                            'All Employee History',
+                                            localizations.allEmployeeHistory,
                                             style: TextStyle(
                                               color: onSurfaceColor,
-                                              fontSize: 16,
+                                              fontSize: 13,
                                               fontWeight: FontWeight.bold,
                                             ),
                                             textAlign: TextAlign.center,
@@ -364,15 +440,21 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildButton(String label, Color color) {
+  Widget _buildButton(BuildContext context, String label, Color color) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final buttonSize =
+        screenWidth * 0.18; // Adjust as needed for responsiveness
     return ElevatedButton(
       onPressed: () {
         // Navigate to FaceScanScreen based on label
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) =>
-                FaceScanScreen(type: label, cameras: widget.cameras),
+            builder: (_) => FaceScanScreen(
+              type: label,
+              cameras: widget.cameras,
+              currentUser: widget.currentUser,
+            ),
           ),
         );
       },
@@ -380,7 +462,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: color,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        minimumSize: const Size(80, 36),
+        minimumSize: const Size(double.infinity, double.infinity),
       ),
       child: Text(label),
     );

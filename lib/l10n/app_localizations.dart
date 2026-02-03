@@ -574,6 +574,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'App Default'**
   String get appFont;
+
+  /// No description provided for @selectDateRangeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Date Range for Attendance History'**
+  String get selectDateRangeTitle;
+
+  /// No description provided for @selectStartDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Start Date'**
+  String get selectStartDate;
+
+  /// No description provided for @selectEndDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select End Date'**
+  String get selectEndDate;
+
+  /// No description provided for @startLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Start: '**
+  String get startLabel;
+
+  /// No description provided for @endLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'End: '**
+  String get endLabel;
+
+  /// No description provided for @pleaseSelectBothDates.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select both start and end dates'**
+  String get pleaseSelectBothDates;
+
+  /// No description provided for @apply.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get apply;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

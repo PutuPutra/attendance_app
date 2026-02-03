@@ -4,10 +4,10 @@
   "companyName": "Masuk ke akun Anda",
   "employee": "Karyawan",
   "attendanceRecord": "Kehadiran",
-  "checkIn": "Masuk",
-  "breakTime": "Istirahat",
-  "returnToWork": "Kembali",
-  "checkOut": "Keluar",
+  "checkIn": "Masuk Kerja",
+  "breakTime": "Jam Istirahat",
+  "returnToWork": "Kembali Kerja",
+  "checkOut": "Pulang Kerja",
   "leave": "Cuti",
   "settings": "Pengaturan",
   "settingsTitle": "Pengaturan",
@@ -120,5 +120,12 @@
   "allEmployeeHistory": "Riwayat Semua Karyawan",
   "fontStyle": "Gaya Font",
   "systemFont": "Sistem",
-  "appFont": "Bawaan Aplikasi"
+  "appFont": "Bawaan Aplikasi",
+  "selectDateRangeTitle": "Pilih Rentang Waktu untuk Menampilkan Riwayat kehadiran",
+  "selectStartDate": "Pilih Tanggal Mulai",
+  "selectEndDate": "Pilih Tanggal Akhir",
+  "startLabel": "Mulai: ",
+  "endLabel": "Akhir: ",
+  "pleaseSelectBothDates": "Silakan pilih tanggal mulai dan akhir",
+  "apply": "Terapkan"
 }

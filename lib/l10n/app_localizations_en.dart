@@ -259,4 +259,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get appFont => 'App Default';
+
+  @override
+  String get selectDateRangeTitle => 'Select Date Range for Attendance History';
+
+  @override
+  String get selectStartDate => 'Select Start Date';
+
+  @override
+  String get selectEndDate => 'Select End Date';
+
+  @override
+  String get startLabel => 'Start: ';
+
+  @override
+  String get endLabel => 'End: ';
+
+  @override
+  String get pleaseSelectBothDates => 'Please select both start and end dates';
+
+  @override
+  String get apply => 'Apply';
 }
