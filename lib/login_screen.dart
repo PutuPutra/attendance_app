@@ -279,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen>
               ),
               margin: EdgeInsets.zero,
               child: Padding(
-                padding: const EdgeInsets.all(60.0),
+                padding: const EdgeInsets.all(30.0),
                 child: FadeTransition(
                   opacity: _fadeAnimation,
                   child: Column(

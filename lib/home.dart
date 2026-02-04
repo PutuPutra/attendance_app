@@ -159,6 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final onSurfaceColor = Theme.of(context).colorScheme.onSurface;
     final surfaceColor = Theme.of(context).colorScheme.surface;
     final onPrimaryColor = Theme.of(context).colorScheme.onPrimary;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final scale = screenWidth / 400.0 < 1.0 ? screenWidth / 400.0 : 1.0;
 
     return Scaffold(
       body: Stack(
@@ -183,11 +185,11 @@ class _HomeScreenState extends State<HomeScreen> {
           Column(
             children: [
               Padding(
-                padding: const EdgeInsets.only(
+                padding: EdgeInsets.only(
                   top: 40,
                   bottom: 40,
-                  left: 16,
-                  right: 16,
+                  left: 16 * scale,
+                  right: 16 * scale,
                 ),
                 child: Row(
                   children: [
@@ -242,7 +244,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                padding: EdgeInsets.symmetric(horizontal: 14.0 * scale),
+                //dari mulai line ini belum responsif
                 child: Card(
                   elevation: 2,
                   color: isDarkMode ? Colors.grey[800] : Colors.white,
@@ -250,39 +253,59 @@ class _HomeScreenState extends State<HomeScreen> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: EdgeInsets.only(
+                      left: 16.0 * scale,
+                      right: 16.0 * scale,
+                      top: 16.0 * scale,
+                      bottom: 8.0 * scale,
+                    ),
                     child: Column(
                       children: [
                         Text(
                           localizations.liveAttendance,
-                          style: TextStyle(color: onSurfaceColor, fontSize: 14),
+                          style: TextStyle(
+                            color: onSurfaceColor,
+                            fontSize: 14 * scale,
+                          ),
                         ),
                         Text(
                           formattedTime,
                           style: TextStyle(
                             color: onSurfaceColor,
-                            fontSize: 32,
+                            fontSize: 32 * scale,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         Text(
                           formattedDate,
-                          style: TextStyle(color: onSurfaceColor, fontSize: 14),
+                          style: TextStyle(
+                            color: onSurfaceColor,
+                            fontSize: 14 * scale,
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 14),
                         Container(
                           height: 1,
                           color: onSurfaceColor.withOpacity(0.1),
-                          margin: const EdgeInsets.symmetric(vertical: 8),
+                          margin: const EdgeInsets.symmetric(
+                            vertical: 1,
+                            horizontal: 2,
+                          ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 10),
                         Text(
                           localizations.officeHours,
-                          style: TextStyle(color: onSurfaceColor, fontSize: 14),
+                          style: TextStyle(
+                            color: onSurfaceColor,
+                            fontSize: 14 * scale,
+                          ),
                         ),
                         Text(
                           localizations.officeHoursTime,
-                          style: TextStyle(color: onSurfaceColor, fontSize: 16),
+                          style: TextStyle(
+                            color: onSurfaceColor,
+                            fontSize: 16 * scale,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         GridView.count(
@@ -291,8 +314,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           physics: const NeverScrollableScrollPhysics(),
                           childAspectRatio:
                               4.0, // Make buttons slimmer (wider than tall)
-                          mainAxisSpacing: 8.0,
-                          crossAxisSpacing: 8.0,
+                          mainAxisSpacing: 8.0 * scale,
+                          crossAxisSpacing: 8.0 * scale,
                           children: [
                             _buildButton(
                               context,
@@ -320,6 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
+                //akhir nya disini juga belum responsif
               ),
               if (widget.currentUser.role == 'admin')
                 Expanded(
@@ -327,8 +351,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 30.0,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 30.0 * scale,
                             vertical: 30.0,
                           ),
                           child: Row(
@@ -359,7 +383,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         children: [
                                           Icon(
                                             Icons.people,
-                                            size: 40,
+                                            size: 40 * scale,
                                             color: onSurfaceColor,
                                           ),
                                           const SizedBox(height: 8),
@@ -367,7 +391,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             localizations.userManagement,
                                             style: TextStyle(
                                               color: onSurfaceColor,
-                                              fontSize: 14,
+                                              fontSize: 14 * scale,
                                               fontWeight: FontWeight.bold,
                                             ),
                                             textAlign: TextAlign.center,
@@ -378,6 +402,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                               ),
+                              const SizedBox(height: 2),
                               const SizedBox(width: 16),
                               Expanded(
                                 child: Card(
@@ -404,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                         children: [
                                           Icon(
                                             Icons.history,
-                                            size: 40,
+                                            size: 40 * scale,
                                             color: onSurfaceColor,
                                           ),
                                           const SizedBox(height: 8),
@@ -412,7 +437,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                             localizations.allEmployeeHistory,
                                             style: TextStyle(
                                               color: onSurfaceColor,
-                                              fontSize: 13,
+                                              fontSize: 13 * scale,
                                               fontWeight: FontWeight.bold,
                                             ),
                                             textAlign: TextAlign.center,
