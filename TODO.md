@@ -1,0 +1,2 @@
+- [x] Fix default font style in settings_screen.dart to 'app' for consistency
+- [x] Test the font change by running the app

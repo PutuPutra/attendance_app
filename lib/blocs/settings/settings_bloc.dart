@@ -18,7 +18,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final themeIndex = prefs.getInt('themeMode') ?? 0;
     final language = prefs.getString('language') ?? 'system';
     final biometricEnabled = prefs.getBool('biometricEnabled') ?? false;
-    final fontStyle = prefs.getString('fontStyle') ?? 'system';
+    final fontStyle = prefs.getString('fontStyle') ?? 'app';
 
     emit(
       SettingsLoaded(

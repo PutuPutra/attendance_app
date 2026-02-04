@@ -1,25 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
 import 'user_management_screen.dart';
 import 'services/user_service.dart';
 
 import '../models/user.dart';
+import 'blocs/settings/settings_bloc.dart';
+import 'blocs/settings/settings_state.dart';
+import 'blocs/settings/settings_event.dart';
 
 class SettingsScreen extends StatefulWidget {
-  final Function(ThemeMode) onThemeChanged;
-  final Function(String) onLanguageChanged;
-  final ThemeMode currentThemeMode;
-  final String currentLanguage;
   final User currentUser;
   final bool openChangePasswordDialog;
 
   const SettingsScreen({
     super.key,
-    required this.onThemeChanged,
-    required this.onLanguageChanged,
-    required this.currentThemeMode,
-    required this.currentLanguage,
     required this.currentUser,
     this.openChangePasswordDialog = false,
   });
@@ -35,25 +31,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   // Additional state for toggles and selections
   bool _biometricEnabled = false; // Toggle for password/biometric
-  late String _selectedFontStyle;
+  String _selectedFontStyle = 'app'; // Default to app
   final _userService = UserService();
 
   @override
   void initState() {
     super.initState();
+    final settings = context.read<SettingsBloc>().state as SettingsLoaded;
     // Map language code to language selection
-    if (widget.currentLanguage == 'system') {
+    if (settings.language == 'system') {
       _selectedLanguage = 'System';
-    } else if (widget.currentLanguage == 'id') {
+    } else if (settings.language == 'id') {
       _selectedLanguage = 'Indonesia';
-    } else if (widget.currentLanguage == 'en') {
+    } else if (settings.language == 'en') {
       _selectedLanguage = 'English';
     } else {
       _selectedLanguage = 'System';
     }
-    _selectedThemeMode = widget.currentThemeMode;
+    _selectedThemeMode = settings.themeMode;
+    _selectedFontStyle = settings.fontStyle;
     _loadBiometricEnabled();
-    _loadFontStyle();
     if (widget.openChangePasswordDialog) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showChangePasswordDialog(context);
@@ -65,13 +62,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       _biometricEnabled = prefs.getBool('biometricEnabled') ?? false;
-    });
-  }
-
-  Future<void> _loadFontStyle() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _selectedFontStyle = prefs.getString('fontStyle') ?? 'system';
     });
   }
 
@@ -106,7 +96,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     } else {
       langCode = 'en';
     }
-    widget.onLanguageChanged(langCode);
+    context.read<SettingsBloc>().add(LanguageChanged(langCode));
     setState(() {
       _selectedLanguage = language;
     });
@@ -124,15 +114,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
       default:
         mode = ThemeMode.system;
     }
-    widget.onThemeChanged(mode);
+    context.read<SettingsBloc>().add(ThemeChanged(mode));
     setState(() {
       _selectedThemeMode = mode;
     });
   }
 
   void _changeFontStyle(String font) {
-    final prefs = SharedPreferences.getInstance();
-    prefs.then((p) => p.setString('fontStyle', font));
+    context.read<SettingsBloc>().add(FontStyleChanged(font));
     setState(() {
       _selectedFontStyle = font;
     });

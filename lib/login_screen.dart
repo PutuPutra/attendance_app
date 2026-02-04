@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:local_auth/local_auth.dart';
 import 'models/user.dart';
 import 'services/user_service.dart';
 import 'home.dart';
@@ -14,22 +13,21 @@ import 'blocs/auth/auth_event.dart';
 import 'blocs/auth/auth_state.dart';
 import 'blocs/settings/settings_bloc.dart';
 import 'blocs/settings/settings_event.dart';
+import 'blocs/settings/settings_state.dart';
 
 class LoginScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
-  final Function(ThemeMode) onThemeChanged;
-  final Function(String) onLanguageChanged;
   final ThemeMode currentThemeMode;
   final String currentLanguage;
+  final String? currentFontStyle;
   final bool biometricEnabled;
 
   const LoginScreen({
     super.key,
     required this.cameras,
-    required this.onThemeChanged,
-    required this.onLanguageChanged,
     required this.currentThemeMode,
     required this.currentLanguage,
+    this.currentFontStyle,
     required this.biometricEnabled,
   });
 
@@ -48,7 +46,6 @@ class _LoginScreenState extends State<LoginScreen>
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   final _userService = UserService();
-  final LocalAuthentication _localAuth = LocalAuthentication();
   bool _isLoading = false;
   bool _isPasswordVisible = false;
   bool _isCountdown = false;
@@ -83,32 +80,13 @@ class _LoginScreenState extends State<LoginScreen>
     super.dispose();
   }
 
-  Future<bool> _authenticateBiometric() async {
-    try {
-      final bool canAuthenticateWithBiometric =
-          await _localAuth.canCheckBiometrics;
-      if (!canAuthenticateWithBiometric) {
-        return false;
-      }
-      final bool didAuthenticate = await _localAuth.authenticate(
-        localizedReason: 'Please authenticate to login',
-        options: const AuthenticationOptions(biometricOnly: true),
-      );
-      return didAuthenticate;
-    } catch (e) {
-      return false;
-    }
-  }
-
   Future<void> _login() async {
     final username = _usernameController.text.trim();
-    final password = widget.biometricEnabled
-        ? ''
-        : _passwordController.text.trim();
+    final password = _passwordController.text.trim();
     final messenger = ScaffoldMessenger.of(context);
     final localizations = AppLocalizations.of(context)!;
 
-    if (username.isEmpty || (!widget.biometricEnabled && password.isEmpty)) {
+    if (username.isEmpty || password.isEmpty) {
       messenger.showSnackBar(
         SnackBar(content: Text(localizations.pleaseEnterUsernameAndPassword)),
       );
@@ -120,24 +98,7 @@ class _LoginScreenState extends State<LoginScreen>
     });
 
     try {
-      User? user;
-      if (widget.biometricEnabled) {
-        final authenticated = await _authenticateBiometric();
-        if (!authenticated) {
-          messenger.showSnackBar(
-            SnackBar(content: Text('Biometric authentication failed')),
-          );
-          setState(() {
-            _isLoading = false;
-          });
-          return;
-        }
-        // Find user by username
-        final users = await _userService.loadUsers();
-        user = users.firstWhere((u) => u.username == username);
-      } else {
-        user = await _userService.authenticate(username, password);
-      }
+      final user = await _userService.authenticate(username, password);
 
       if (user != null) {
         // Save current user to shared preferences
@@ -146,6 +107,15 @@ class _LoginScreenState extends State<LoginScreen>
         await prefs.setString('current_user_username', user.username);
         await prefs.setString('current_user_email', user.email);
         await prefs.setString('current_user_role', user.role);
+        await prefs.setInt(
+          'last_activity',
+          DateTime.now().millisecondsSinceEpoch,
+        );
+
+        // Set default font style to 'app' if not set
+        if (prefs.getString('fontStyle') == null) {
+          await prefs.setString('fontStyle', 'app');
+        }
 
         // Check if just reset password
         final justReset = prefs.getBool('just_reset_password') ?? false;
@@ -156,14 +126,18 @@ class _LoginScreenState extends State<LoginScreen>
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => HomeScreen(
-                  cameras: widget.cameras,
-                  onThemeChanged: widget.onThemeChanged,
-                  onLanguageChanged: widget.onLanguageChanged,
-                  currentThemeMode: widget.currentThemeMode,
-                  currentLanguage: widget.currentLanguage,
-                  currentUser: user!,
-                  biometricEnabled: widget.biometricEnabled,
+                builder: (_) => BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                    final s = state as SettingsLoaded;
+                    return HomeScreen(
+                      cameras: widget.cameras,
+                      currentThemeMode: s.themeMode,
+                      currentLanguage: s.language,
+                      currentFontStyle: s.fontStyle,
+                      currentUser: user,
+                      biometricEnabled: s.biometricEnabled,
+                    );
+                  },
                 ),
               ),
             );
@@ -174,14 +148,18 @@ class _LoginScreenState extends State<LoginScreen>
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
-                builder: (_) => HomeScreen(
-                  cameras: widget.cameras,
-                  onThemeChanged: widget.onThemeChanged,
-                  onLanguageChanged: widget.onLanguageChanged,
-                  currentThemeMode: widget.currentThemeMode,
-                  currentLanguage: widget.currentLanguage,
-                  currentUser: user!,
-                  biometricEnabled: widget.biometricEnabled,
+                builder: (_) => BlocBuilder<SettingsBloc, SettingsState>(
+                  builder: (context, state) {
+                    final s = state as SettingsLoaded;
+                    return HomeScreen(
+                      cameras: widget.cameras,
+                      currentThemeMode: s.themeMode,
+                      currentLanguage: s.language,
+                      currentFontStyle: s.fontStyle,
+                      currentUser: user,
+                      biometricEnabled: s.biometricEnabled,
+                    );
+                  },
                 ),
               ),
             );
@@ -210,7 +188,6 @@ class _LoginScreenState extends State<LoginScreen>
     final nextIndex = (currentIndex + 1) % ThemeMode.values.length;
     final newTheme = ThemeMode.values[nextIndex];
     context.read<SettingsBloc>().add(ThemeChanged(newTheme));
-    widget.onThemeChanged(newTheme); // Keep for compatibility
   }
 
   void _switchLanguage() {
@@ -219,7 +196,6 @@ class _LoginScreenState extends State<LoginScreen>
     final nextIndex = (currentIndex + 1) % languages.length;
     final newLanguage = languages[nextIndex];
     context.read<SettingsBloc>().add(LanguageChanged(newLanguage));
-    widget.onLanguageChanged(newLanguage); // Keep for compatibility
   }
 
   void _showForgotPasswordDialog() {
@@ -324,57 +300,51 @@ class _LoginScreenState extends State<LoginScreen>
                           filled: true,
                           fillColor: theme.colorScheme.surface,
                         ),
-                        textInputAction: widget.biometricEnabled
-                            ? TextInputAction.done
-                            : TextInputAction.next,
-                        onSubmitted: widget.biometricEnabled
-                            ? (_) => _login()
-                            : null,
+                        textInputAction: TextInputAction.next,
+                        onSubmitted: null,
                       ),
                       const SizedBox(height: 20),
-                      if (!widget.biometricEnabled)
-                        TextField(
-                          controller: _passwordController,
-                          style: TextStyle(color: theme.colorScheme.onSurface),
-                          decoration: InputDecoration(
-                            labelText: localizations.password,
-                            prefixIcon: const Icon(Icons.lock),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                _isPasswordVisible
-                                    ? Icons.visibility
-                                    : Icons.visibility_off,
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  _isPasswordVisible = !_isPasswordVisible;
-                                });
-                              },
+                      TextField(
+                        controller: _passwordController,
+                        style: TextStyle(color: theme.colorScheme.onSurface),
+                        decoration: InputDecoration(
+                          labelText: localizations.password,
+                          prefixIcon: const Icon(Icons.lock),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
                             ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: theme.colorScheme.surface,
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
                           ),
-                          obscureText: !_isPasswordVisible,
-                          textInputAction: TextInputAction.done,
-                          onSubmitted: (_) => _login(),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          filled: true,
+                          fillColor: theme.colorScheme.surface,
                         ),
-                      if (!widget.biometricEnabled) const SizedBox(height: 8),
-                      if (!widget.biometricEnabled)
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: TextButton(
-                            onPressed: _showForgotPasswordDialog,
-                            child: Text(
-                              _isCountdown
-                                  ? '$_countdown detik'
-                                  : localizations.forgotPassword,
-                              style: const TextStyle(fontSize: 14),
-                            ),
+                        obscureText: !_isPasswordVisible,
+                        textInputAction: TextInputAction.done,
+                        onSubmitted: (_) => _login(),
+                      ),
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: _showForgotPasswordDialog,
+                          child: Text(
+                            _isCountdown
+                                ? '$_countdown detik'
+                                : localizations.forgotPassword,
+                            style: const TextStyle(fontSize: 14),
                           ),
                         ),
+                      ),
                       const SizedBox(height: 24),
                       SizedBox(
                         width: double.infinity,
@@ -395,9 +365,7 @@ class _LoginScreenState extends State<LoginScreen>
                                   ),
                                 )
                               : Text(
-                                  widget.biometricEnabled
-                                      ? localizations.passwordOrBiometric
-                                      : localizations.login,
+                                  localizations.login,
                                   style: const TextStyle(
                                     fontSize: 16,
                                     fontWeight: FontWeight.bold,

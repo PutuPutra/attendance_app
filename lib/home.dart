@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,23 +13,23 @@ import 'all_employee_history_screen.dart';
 import 'l10n/app_localizations.dart';
 import '../models/user.dart';
 import '../services/user_service.dart';
+import 'blocs/settings/settings_bloc.dart';
+import 'blocs/settings/settings_state.dart';
 
 class HomeScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
-  final Function(ThemeMode) onThemeChanged;
-  final Function(String) onLanguageChanged;
   final ThemeMode currentThemeMode;
   final String currentLanguage;
+  final String currentFontStyle;
   final User currentUser;
   final bool biometricEnabled;
 
   const HomeScreen({
     super.key,
     required this.cameras,
-    required this.onThemeChanged,
-    required this.onLanguageChanged,
     required this.currentThemeMode,
     required this.currentLanguage,
+    required this.currentFontStyle,
     required this.currentUser,
     required this.biometricEnabled,
   });
@@ -49,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _updateActivityTimestamp();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {});
     });
@@ -65,10 +67,6 @@ class _HomeScreenState extends State<HomeScreen> {
             context,
             MaterialPageRoute(
               builder: (_) => SettingsScreen(
-                onThemeChanged: widget.onThemeChanged,
-                onLanguageChanged: widget.onLanguageChanged,
-                currentThemeMode: widget.currentThemeMode,
-                currentLanguage: widget.currentLanguage,
                 currentUser: widget.currentUser,
                 openChangePasswordDialog: true,
               ),
@@ -91,13 +89,17 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (_) => LoginScreen(
-          cameras: widget.cameras,
-          onThemeChanged: widget.onThemeChanged,
-          onLanguageChanged: widget.onLanguageChanged,
-          currentThemeMode: widget.currentThemeMode,
-          currentLanguage: widget.currentLanguage,
-          biometricEnabled: widget.biometricEnabled,
+        builder: (_) => BlocBuilder<SettingsBloc, SettingsState>(
+          builder: (context, state) {
+            final s = state as SettingsLoaded;
+            return LoginScreen(
+              cameras: widget.cameras,
+              currentThemeMode: s.themeMode,
+              currentLanguage: s.language,
+              currentFontStyle: s.fontStyle,
+              biometricEnabled: s.biometricEnabled,
+            );
+          },
         ),
       ),
       (route) => false,
@@ -144,6 +146,11 @@ class _HomeScreenState extends State<HomeScreen> {
     final userService = UserService();
     _allUsers = await userService.loadUsers();
     setState(() {});
+  }
+
+  Future<void> _updateActivityTimestamp() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('last_activity', DateTime.now().millisecondsSinceEpoch);
   }
 
   @override
@@ -225,13 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => SettingsScreen(
-                              onThemeChanged: widget.onThemeChanged,
-                              onLanguageChanged: widget.onLanguageChanged,
-                              currentThemeMode: widget.currentThemeMode,
-                              currentLanguage: widget.currentLanguage,
-                              currentUser: widget.currentUser,
-                            ),
+                            builder: (_) =>
+                                SettingsScreen(currentUser: widget.currentUser),
                           ),
                         );
                       },
@@ -470,7 +472,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final buttonSize =
         screenWidth * 0.18; // Adjust as needed for responsiveness
     return ElevatedButton(
-      onPressed: () {
+      onPressed: () async {
+        await _updateActivityTimestamp();
         // Navigate to FaceScanScreen based on label
         Navigator.push(
           context,

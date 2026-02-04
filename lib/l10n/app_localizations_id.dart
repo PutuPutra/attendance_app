@@ -24,16 +24,16 @@ class AppLocalizationsId extends AppLocalizations {
   String get attendanceRecord => 'Kehadiran';
 
   @override
-  String get checkIn => 'Masuk Kerja';
+  String get checkIn => 'Masuk';
 
   @override
-  String get breakTime => 'Jam Istirahat';
+  String get breakTime => 'Istirahat';
 
   @override
-  String get returnToWork => 'Kembali Kerja';
+  String get returnToWork => 'Kembali';
 
   @override
-  String get checkOut => 'Pulang Kerja';
+  String get checkOut => 'Pulang';
 
   @override
   String get leave => 'Cuti';
@@ -78,7 +78,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get delete => 'Hapus';
 
   @override
-  String get confirmDelete => 'Apakah Anda yakin ingin menghapus semua data wajah?';
+  String get confirmDelete =>
+      'Apakah Anda yakin ingin menghapus semua data wajah?';
 
   @override
   String get dataDeleted => 'Data wajah telah dihapus.';
@@ -200,10 +201,12 @@ class AppLocalizationsId extends AppLocalizations {
   String get incorrectOldPassword => 'Kata sandi lama salah';
 
   @override
-  String get pleaseEnterUsernameAndPassword => 'Silakan masukkan nama pengguna dan kata sandi';
+  String get pleaseEnterUsernameAndPassword =>
+      'Silakan masukkan nama pengguna dan kata sandi';
 
   @override
-  String get invalidUsernameOrPassword => 'Nama pengguna atau kata sandi tidak valid';
+  String get invalidUsernameOrPassword =>
+      'Nama pengguna atau kata sandi tidak valid';
 
   @override
   String loginFailed(String error) {
@@ -261,7 +264,8 @@ class AppLocalizationsId extends AppLocalizations {
   String get appFont => 'Bawaan Aplikasi';
 
   @override
-  String get selectDateRangeTitle => 'Pilih Rentang Waktu untuk Menampilkan Riwayat kehadiran';
+  String get selectDateRangeTitle =>
+      'Pilih Rentang Waktu untuk Menampilkan Riwayat kehadiran';
 
   @override
   String get selectStartDate => 'Pilih Tanggal Mulai';
