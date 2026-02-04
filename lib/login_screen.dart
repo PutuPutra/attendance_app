@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
@@ -8,6 +9,11 @@ import 'services/user_service.dart';
 import 'home.dart';
 import 'settings_screen.dart';
 import 'l10n/app_localizations.dart';
+import 'blocs/auth/auth_bloc.dart';
+import 'blocs/auth/auth_event.dart';
+import 'blocs/auth/auth_state.dart';
+import 'blocs/settings/settings_bloc.dart';
+import 'blocs/settings/settings_event.dart';
 
 class LoginScreen extends StatefulWidget {
   final List<CameraDescription> cameras;
@@ -202,14 +208,18 @@ class _LoginScreenState extends State<LoginScreen>
   void _switchTheme() {
     final currentIndex = widget.currentThemeMode.index;
     final nextIndex = (currentIndex + 1) % ThemeMode.values.length;
-    widget.onThemeChanged(ThemeMode.values[nextIndex]);
+    final newTheme = ThemeMode.values[nextIndex];
+    context.read<SettingsBloc>().add(ThemeChanged(newTheme));
+    widget.onThemeChanged(newTheme); // Keep for compatibility
   }
 
   void _switchLanguage() {
     const languages = ['system', 'en', 'id'];
     final currentIndex = languages.indexOf(widget.currentLanguage);
     final nextIndex = (currentIndex + 1) % languages.length;
-    widget.onLanguageChanged(languages[nextIndex]);
+    final newLanguage = languages[nextIndex];
+    context.read<SettingsBloc>().add(LanguageChanged(newLanguage));
+    widget.onLanguageChanged(newLanguage); // Keep for compatibility
   }
 
   void _showForgotPasswordDialog() {

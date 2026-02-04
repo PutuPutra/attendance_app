@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:camera/camera.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home.dart';
@@ -7,6 +8,10 @@ import 'login_screen.dart';
 import 'l10n/app_localizations.dart';
 import 'models/user.dart';
 import 'services/user_service.dart';
+import 'blocs/auth/auth_bloc.dart';
+import 'blocs/user/user_bloc.dart';
+import 'blocs/attendance/attendance_bloc.dart';
+import 'blocs/settings/settings_bloc.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -121,72 +126,80 @@ class _MyAppState extends State<MyApp> {
       );
     }
 
-    return MaterialApp(
-      title: 'Attendance App',
-      debugShowCheckedModeBanner: false,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => AuthBloc(userService: UserService())),
+        BlocProvider(create: (context) => UserBloc(userService: UserService())),
+        BlocProvider(create: (context) => AttendanceBloc()),
+        BlocProvider(create: (context) => SettingsBloc()),
       ],
-      supportedLocales: const [
-        Locale('en'), // English
-        Locale('id'), // Indonesian
-      ],
-      locale: _locale,
-      theme: ThemeData(
-        brightness: Brightness.light,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.grey[100],
-        cardColor: Colors.white,
-        fontFamily: _fontStyle == 'app' ? 'Roboto' : null,
-        textTheme: const TextTheme(
-          bodyLarge: TextStyle(color: Colors.white),
-          headlineLarge: TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-          bodyMedium: TextStyle(color: Colors.white),
-        ),
-      ),
-      darkTheme: ThemeData(
-        brightness: Brightness.dark,
-        primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.grey[900],
-        cardColor: Colors.grey,
-        fontFamily: _fontStyle == 'app' ? 'Roboto' : null,
-
-        textTheme: TextTheme(
-          bodyLarge: TextStyle(color: Colors.white),
-          headlineLarge: TextStyle(
-            color: Colors.white,
-            fontSize: 32,
-            fontWeight: FontWeight.bold,
-          ),
-          bodyMedium: TextStyle(color: Colors.grey.shade300),
-        ),
-      ),
-      themeMode: _themeMode,
-      home: _currentUser != null
-          ? HomeScreen(
-              cameras: cameras!,
-              onThemeChanged: _saveThemeMode,
-              onLanguageChanged: _saveLanguage,
-              currentThemeMode: _themeMode,
-              currentLanguage: _currentLanguage,
-              currentUser: _currentUser!,
-              biometricEnabled: _biometricEnabled,
-            )
-          : LoginScreen(
-              cameras: cameras!,
-              onThemeChanged: _saveThemeMode,
-              onLanguageChanged: _saveLanguage,
-              currentThemeMode: _themeMode,
-              currentLanguage: _currentLanguage,
-              biometricEnabled: _biometricEnabled,
+      child: MaterialApp(
+        title: 'Attendance App',
+        debugShowCheckedModeBanner: false,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: const [
+          Locale('en'), // English
+          Locale('id'), // Indonesian
+        ],
+        locale: _locale,
+        theme: ThemeData(
+          brightness: Brightness.light,
+          primarySwatch: Colors.blue,
+          scaffoldBackgroundColor: Colors.grey[100],
+          cardColor: Colors.white,
+          fontFamily: _fontStyle == 'app' ? 'Roboto' : null,
+          textTheme: const TextTheme(
+            bodyLarge: TextStyle(color: Colors.white),
+            headlineLarge: TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
             ),
+            bodyMedium: TextStyle(color: Colors.white),
+          ),
+        ),
+        darkTheme: ThemeData(
+          brightness: Brightness.dark,
+          primarySwatch: Colors.blue,
+          scaffoldBackgroundColor: Colors.grey[900],
+          cardColor: Colors.grey,
+          fontFamily: _fontStyle == 'app' ? 'Roboto' : null,
+
+          textTheme: TextTheme(
+            bodyLarge: TextStyle(color: Colors.white),
+            headlineLarge: TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
+            bodyMedium: TextStyle(color: Colors.grey.shade300),
+          ),
+        ),
+        themeMode: _themeMode,
+        home: _currentUser != null
+            ? HomeScreen(
+                cameras: cameras!,
+                onThemeChanged: _saveThemeMode,
+                onLanguageChanged: _saveLanguage,
+                currentThemeMode: _themeMode,
+                currentLanguage: _currentLanguage,
+                currentUser: _currentUser!,
+                biometricEnabled: _biometricEnabled,
+              )
+            : LoginScreen(
+                cameras: cameras!,
+                onThemeChanged: _saveThemeMode,
+                onLanguageChanged: _saveLanguage,
+                currentThemeMode: _themeMode,
+                currentLanguage: _currentLanguage,
+                biometricEnabled: _biometricEnabled,
+              ),
+      ),
     );
   }
 }

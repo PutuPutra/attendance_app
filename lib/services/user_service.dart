@@ -12,8 +12,13 @@ class UserService {
   static const String _usersFileName = 'users.json';
 
   Future<String> _getUsersFilePath() async {
-    final directory = await getApplicationDocumentsDirectory();
-    return '${directory.path}/$_usersFileName';
+    if (kIsWeb) {
+      // For web, we use shared preferences, no file path needed
+      return '';
+    } else {
+      final directory = await getApplicationDocumentsDirectory();
+      return path.join(directory.path, _usersFileName);
+    }
   }
 
   Future<void> _ensureUsersFileExists() async {
