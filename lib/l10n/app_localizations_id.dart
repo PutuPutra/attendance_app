@@ -51,6 +51,14 @@ class AppLocalizationsId extends AppLocalizations {
   String get faceSaved => 'Wajah Tersimpan';
 
   @override
+  String get noFaceDataSaved => 'Tidak ada data wajah tersimpan.';
+
+  @override
+  String faceFeaturesCount(Object count) {
+    return 'Fitur wajah: $count nilai';
+  }
+
+  @override
   String get getPersonalFaceData => 'Dapatkan Data Wajah Pribadi';
 
   @override
@@ -284,4 +292,39 @@ class AppLocalizationsId extends AppLocalizations {
 
   @override
   String get apply => 'Terapkan';
+
+  @override
+  String get lookStraight => 'Lihat lurus ke kamera';
+
+  @override
+  String get turnRight => 'Putar kepala ke kanan';
+
+  @override
+  String get turnLeft => 'Putar kepala ke kiri';
+
+  @override
+  String get lookDown => 'Lihat ke bawah';
+
+  @override
+  String get lookUp => 'Lihat ke atas';
+
+  @override
+  String get positionCorrect => 'Posisi benar, menangkap...';
+
+  @override
+  String get enterFaceName => 'Masukkan nama untuk wajah ini';
+
+  @override
+  String get faceName => 'Nama Wajah';
+
+  @override
+  String get save => 'Simpan';
+
+  @override
+  String belumWaktunya(String type) {
+    return 'Belum waktunya untuk $type';
+  }
+
+  @override
+  String get proceedAnyway => 'Lanjutkan Saja';
 }

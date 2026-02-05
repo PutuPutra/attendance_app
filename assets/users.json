@@ -12,5 +12,12 @@
     "password": "karyawan",
     "email": "icamstudioofficial@gmail.com",
     "role": "karyawan"
+  },
+  {
+    "id": "3",
+    "username": "wiranata",
+    "password": "wiranata",
+    "email": "wiranata@gmail.com",
+    "role": "karyawan"
   }
 ]

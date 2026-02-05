@@ -5,6 +5,8 @@ class User {
   final String email;
   final String role;
   final String? faceImagePath;
+  final List<double>? faceEmbeddings;
+  final String? faceName;
 
   User({
     required this.id,
@@ -13,6 +15,8 @@ class User {
     required this.email,
     required this.role,
     this.faceImagePath,
+    this.faceEmbeddings,
+    this.faceName,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -23,6 +27,10 @@ class User {
       email: json['email'],
       role: json['role'],
       faceImagePath: json['faceImagePath'],
+      faceEmbeddings: json['faceEmbeddings'] != null
+          ? List<double>.from(json['faceEmbeddings'])
+          : null,
+      faceName: json['faceName'],
     );
   }
 
@@ -34,6 +42,8 @@ class User {
       'email': email,
       'role': role,
       'faceImagePath': faceImagePath,
+      'faceEmbeddings': faceEmbeddings,
+      'faceName': faceName,
     };
   }
 
@@ -44,6 +54,8 @@ class User {
     String? email,
     String? role,
     String? faceImagePath,
+    List<double>? faceEmbeddings,
+    String? faceName,
   }) {
     return User(
       id: id ?? this.id,
@@ -52,6 +64,8 @@ class User {
       email: email ?? this.email,
       role: role ?? this.role,
       faceImagePath: faceImagePath ?? this.faceImagePath,
+      faceEmbeddings: faceEmbeddings ?? this.faceEmbeddings,
+      faceName: faceName ?? this.faceName,
     );
   }
 }

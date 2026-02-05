@@ -51,6 +51,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get faceSaved => 'Face Saved';
 
   @override
+  String get noFaceDataSaved => 'No face data saved.';
+
+  @override
+  String faceFeaturesCount(Object count) {
+    return 'Face features: $count values';
+  }
+
+  @override
   String get getPersonalFaceData => 'Get Personal Face Data';
 
   @override
@@ -200,7 +208,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get incorrectOldPassword => 'Incorrect old password';
 
   @override
-  String get pleaseEnterUsernameAndPassword => 'Please enter username and password';
+  String get pleaseEnterUsernameAndPassword =>
+      'Please enter username and password';
 
   @override
   String get invalidUsernameOrPassword => 'Invalid username or password';
@@ -280,4 +289,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get apply => 'Apply';
+
+  @override
+  String get lookStraight => 'Look straight at the camera';
+
+  @override
+  String get turnRight => 'Turn your head to the right';
+
+  @override
+  String get turnLeft => 'Turn your head to the left';
+
+  @override
+  String get lookDown => 'Look down';
+
+  @override
+  String get lookUp => 'Look up';
+
+  @override
+  String get positionCorrect => 'Position correct, capturing...';
+
+  @override
+  String get enterFaceName => 'Enter a name for this face';
+
+  @override
+  String get faceName => 'Face Name';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String belumWaktunya(String type) {
+    return 'It\'s not time yet for $type';
+  }
+
+  @override
+  String get proceedAnyway => 'Proceed Anyway';
 }

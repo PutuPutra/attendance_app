@@ -62,7 +62,8 @@ import 'app_localizations_id.dart';
 /// be consistent with the languages listed in the AppLocalizations.supportedLocales
 /// property.
 abstract class AppLocalizations {
-  AppLocalizations(String locale) : localeName = intl.Intl.canonicalizedLocale(locale.toString());
+  AppLocalizations(String locale)
+    : localeName = intl.Intl.canonicalizedLocale(locale.toString());
 
   final String localeName;
 
@@ -70,7 +71,8 @@ abstract class AppLocalizations {
     return Localizations.of<AppLocalizations>(context, AppLocalizations);
   }
 
-  static const LocalizationsDelegate<AppLocalizations> delegate = _AppLocalizationsDelegate();
+  static const LocalizationsDelegate<AppLocalizations> delegate =
+      _AppLocalizationsDelegate();
 
   /// A list of this localizations delegate along with the default localizations
   /// delegates.
@@ -82,17 +84,18 @@ abstract class AppLocalizations {
   /// Additional delegates can be added by appending to this list in
   /// MaterialApp. This list does not have to be used at all if a custom list
   /// of delegates is preferred or required.
-  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
-    delegate,
-    GlobalMaterialLocalizations.delegate,
-    GlobalCupertinoLocalizations.delegate,
-    GlobalWidgetsLocalizations.delegate,
-  ];
+  static const List<LocalizationsDelegate<dynamic>> localizationsDelegates =
+      <LocalizationsDelegate<dynamic>>[
+        delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+      ];
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
     Locale('en'),
-    Locale('id')
+    Locale('id'),
   ];
 
   /// No description provided for @appTitle.
@@ -178,6 +181,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Face Saved'**
   String get faceSaved;
+
+  /// No description provided for @noFaceDataSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'No face data saved.'**
+  String get noFaceDataSaved;
+
+  /// No description provided for @faceFeaturesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Face features: {count} values'**
+  String faceFeaturesCount(Object count);
 
   /// No description provided for @getPersonalFaceData.
   ///
@@ -616,9 +631,76 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Apply'**
   String get apply;
+
+  /// No description provided for @lookStraight.
+  ///
+  /// In en, this message translates to:
+  /// **'Look straight at the camera'**
+  String get lookStraight;
+
+  /// No description provided for @turnRight.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your head to the right'**
+  String get turnRight;
+
+  /// No description provided for @turnLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Turn your head to the left'**
+  String get turnLeft;
+
+  /// No description provided for @lookDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Look down'**
+  String get lookDown;
+
+  /// No description provided for @lookUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Look up'**
+  String get lookUp;
+
+  /// No description provided for @positionCorrect.
+  ///
+  /// In en, this message translates to:
+  /// **'Position correct, capturing...'**
+  String get positionCorrect;
+
+  /// No description provided for @enterFaceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a name for this face'**
+  String get enterFaceName;
+
+  /// No description provided for @faceName.
+  ///
+  /// In en, this message translates to:
+  /// **'Face Name'**
+  String get faceName;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @belumWaktunya.
+  ///
+  /// In en, this message translates to:
+  /// **'It's not time yet for {type}'**
+  String belumWaktunya(String type);
+
+  /// No description provided for @proceedAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Proceed Anyway'**
+  String get proceedAnyway;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -627,25 +709,26 @@ class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> 
   }
 
   @override
-  bool isSupported(Locale locale) => <String>['en', 'id'].contains(locale.languageCode);
+  bool isSupported(Locale locale) =>
+      <String>['en', 'id'].contains(locale.languageCode);
 
   @override
   bool shouldReload(_AppLocalizationsDelegate old) => false;
 }
 
 AppLocalizations lookupAppLocalizations(Locale locale) {
-
-
   // Lookup logic when only language code is specified.
   switch (locale.languageCode) {
-    case 'en': return AppLocalizationsEn();
-    case 'id': return AppLocalizationsId();
+    case 'en':
+      return AppLocalizationsEn();
+    case 'id':
+      return AppLocalizationsId();
   }
 
   throw FlutterError(
     'AppLocalizations.delegate failed to load unsupported locale "$locale". This is likely '
     'an issue with the localizations generation tool. Please file an issue '
     'on GitHub with a reproducible sample app and the gen-l10n configuration '
-    'that was used.'
+    'that was used.',
   );
 }

@@ -2,10 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'l10n/app_localizations.dart';
+import 'services/user_service.dart';
+import 'models/attendance.dart';
+import 'models/user.dart';
 
 class AttendanceHistoryWidget extends StatefulWidget {
   final bool isScrollable;
-  const AttendanceHistoryWidget({super.key, this.isScrollable = false});
+  final User currentUser;
+  const AttendanceHistoryWidget({
+    super.key,
+    this.isScrollable = false,
+    required this.currentUser,
+  });
 
   @override
   State<AttendanceHistoryWidget> createState() =>
@@ -14,6 +22,7 @@ class AttendanceHistoryWidget extends StatefulWidget {
 
 class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
   List<Map<String, dynamic>> _attendanceHistory = [];
+  List<Map<String, dynamic>> _fullAttendanceHistory = [];
   bool _showRefreshIcon = false;
   DateTime? _startDateFilter;
   DateTime? _endDateFilter;
@@ -102,24 +111,46 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
   }
 
   Future<void> _loadAttendanceHistory() async {
-    final prefs = await SharedPreferences.getInstance();
+    final userService = UserService();
+    final allAttendances = await userService.loadAttendances();
+    final attendances = allAttendances
+        .where((a) => a.userId == widget.currentUser.id)
+        .toList();
 
-    // Clear old data and force reload with new format
-    await prefs.remove('attendance_history');
+    // Convert to the expected format
+    final history = attendances.map((attendance) {
+      final date = attendance.date;
+      final checkIn = _formatTime(attendance.checkInTime);
+      final breakTime = _formatTime(attendance.breakTime);
+      final returnTime = _formatTime(attendance.returnTime);
+      final checkOut = _formatTime(attendance.checkOutTime);
+      final status = 'green'; // For now, assume on time
 
-    final history = _getAttendanceHistory();
-
-    // Simpan dengan format baru
-    final historyJsonDummy = history.map((entry) {
-      final date = entry['date'] as DateTime;
-      return '${date.toIso8601String()}|${entry['checkIn']}|${entry['break']}|${entry['return']}|${entry['checkOut']}|${entry['status']}';
+      return {
+        'date': date,
+        'checkIn': checkIn,
+        'break': breakTime,
+        'return': returnTime,
+        'checkOut': checkOut,
+        'status': status,
+      };
     }).toList();
-    await prefs.setStringList('attendance_history', historyJsonDummy);
 
     setState(() {
-      _attendanceHistory = history;
+      _fullAttendanceHistory = history;
       _filterToLast7Days();
     });
+  }
+
+  String _formatTime(String? time) {
+    if (time == null) return '-';
+    // time is HH:mm, convert to 12-hour with AM/PM
+    final parts = time.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = parts[1];
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final hour12 = hour == 0 ? 12 : (hour > 12 ? hour - 12 : hour);
+    return '$hour12:$minute $period';
   }
 
   Future<void> _saveAttendanceHistory() async {
@@ -131,7 +162,7 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
   }
 
   void _filterToLast7Days() {
-    final fullHistory = _getAttendanceHistory();
+    final fullHistory = _fullAttendanceHistory;
     final now = DateTime.now();
     final sevenDaysAgo = now.subtract(const Duration(days: 7));
     final filtered =
@@ -152,7 +183,7 @@ class _AttendanceHistoryWidgetState extends State<AttendanceHistoryWidget> {
   }
 
   void _filterByDateRange(DateTime start, DateTime end) {
-    final fullHistory = _getAttendanceHistory();
+    final fullHistory = _fullAttendanceHistory;
     final filtered =
         fullHistory.where((entry) {
           final date = entry['date'] as DateTime;

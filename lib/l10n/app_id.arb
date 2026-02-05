@@ -13,6 +13,8 @@
   "settingsTitle": "Pengaturan",
   "changePassword": "Ubah Kata Sandi",
   "faceSaved": "Wajah Tersimpan",
+  "noFaceDataSaved": "Tidak ada data wajah tersimpan.",
+  "faceFeaturesCount": "Fitur wajah: {count} nilai",
   "getPersonalFaceData": "Dapatkan Data Wajah Pribadi",
   "clearAllFaceData": "Hapus Semua Data Wajah",
   "language": "Bahasa",
@@ -127,5 +129,23 @@
   "startLabel": "Mulai: ",
   "endLabel": "Akhir: ",
   "pleaseSelectBothDates": "Silakan pilih tanggal mulai dan akhir",
-  "apply": "Terapkan"
+  "apply": "Terapkan",
+  "lookStraight": "Lihat lurus ke kamera",
+  "turnRight": "Putar kepala ke kanan",
+  "turnLeft": "Putar kepala ke kiri",
+  "lookDown": "Lihat ke bawah",
+  "lookUp": "Lihat ke atas",
+  "positionCorrect": "Posisi benar, menangkap...",
+  "enterFaceName": "Masukkan nama untuk wajah ini",
+  "faceName": "Nama Wajah",
+  "save": "Simpan",
+  "belumWaktunya": "Belum waktunya untuk {type}",
+  "@belumWaktunya": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "proceedAnyway": "Lanjutkan Saja"
 }

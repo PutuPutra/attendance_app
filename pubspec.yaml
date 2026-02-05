@@ -43,9 +43,12 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   image_picker: ^1.2.1
+  image: ^4.1.3
   permission_handler: ^12.0.1
   flutter_bloc: ^9.1.1
   equatable: ^2.0.5
+  tflite_flutter: ^0.11.0
+  flutter_secure_storage: ^9.0.0
 
 dev_dependencies:
   flutter_test:
@@ -73,6 +76,7 @@ flutter:
   assets:
     - assets/users.json
     - assets/images/
+    - assets/models/mobilefacenet.tflite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

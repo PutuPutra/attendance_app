@@ -3,76 +3,39 @@ import 'dart:io';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mlkit_face_detection/google_mlkit_face_detection.dart';
+import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import '../models/attendance.dart';
 
 class UserService {
-  static const String _usersFileName = 'users.json';
-
-  Future<String> _getUsersFilePath() async {
-    if (kIsWeb) {
-      // For web, we use shared preferences, no file path needed
-      return '';
-    } else {
-      final directory = await getApplicationDocumentsDirectory();
-      return path.join(directory.path, _usersFileName);
-    }
-  }
-
-  Future<void> _ensureUsersFileExists() async {
-    final filePath = await _getUsersFilePath();
-    final file = File(filePath);
-
-    if (!await file.exists()) {
-      // Load initial users from assets
-      final initialUsersJson = await rootBundle.loadString('assets/users.json');
-      await file.writeAsString(initialUsersJson);
-    }
-  }
+  static const FlutterSecureStorage _secureStorage = FlutterSecureStorage();
+  static const String _usersKey = 'encrypted_users';
 
   Future<List<User>> loadUsers() async {
-    if (kIsWeb) {
-      final prefs = await SharedPreferences.getInstance();
-      final usersJson = prefs.getString('users');
-      if (usersJson != null) {
-        final List<dynamic> jsonList = json.decode(usersJson);
-        return jsonList.map((json) => User.fromJson(json)).toList();
-      } else {
-        // Load initial users from assets
-        final initialUsersJson = await rootBundle.loadString(
-          'assets/users.json',
-        );
-        final List<dynamic> jsonList = json.decode(initialUsersJson);
-        final users = jsonList.map((json) => User.fromJson(json)).toList();
-        // Save to prefs
-        await saveUsers(users);
-        return users;
-      }
-    } else {
-      await _ensureUsersFileExists();
-      final filePath = await _getUsersFilePath();
-      final file = File(filePath);
-      final contents = await file.readAsString();
-      final List<dynamic> jsonList = json.decode(contents);
+    final usersJson = await _secureStorage.read(key: _usersKey);
+    if (usersJson != null) {
+      final List<dynamic> jsonList = json.decode(usersJson);
       return jsonList.map((json) => User.fromJson(json)).toList();
+    } else {
+      // Load initial users from assets
+      final initialUsersJson = await rootBundle.loadString('assets/users.json');
+      final List<dynamic> jsonList = json.decode(initialUsersJson);
+      final users = jsonList.map((json) => User.fromJson(json)).toList();
+      // Save to secure storage
+      await saveUsers(users);
+      return users;
     }
   }
 
   Future<void> saveUsers(List<User> users) async {
-    if (kIsWeb) {
-      final prefs = await SharedPreferences.getInstance();
-      final jsonList = users.map((user) => user.toJson()).toList();
-      final contents = json.encode(jsonList);
-      await prefs.setString('users', contents);
-    } else {
-      final filePath = await _getUsersFilePath();
-      final file = File(filePath);
-      final jsonList = users.map((user) => user.toJson()).toList();
-      final contents = json.encode(jsonList);
-      await file.writeAsString(contents);
-    }
+    final jsonList = users.map((user) => user.toJson()).toList();
+    final contents = json.encode(jsonList);
+    await _secureStorage.write(key: _usersKey, value: contents);
   }
 
   Future<User?> authenticate(String username, String password) async {
@@ -126,14 +89,18 @@ class UserService {
   }
 
   Future<String> saveFaceImage(String userId, File imageFile) async {
-    final directory = Directory('assets/images');
-    if (!await directory.exists()) {
-      await directory.create(recursive: true);
+    final directory = await getApplicationDocumentsDirectory();
+    final faceDir = Directory(
+      path.join(directory.path, 'assets', 'face_images'),
+    );
+    if (!await faceDir.exists()) {
+      await faceDir.create(recursive: true);
     }
     final fileName = '${userId}_face.jpg';
-    final filePath = path.join(directory.path, fileName);
+    final filePath = path.join(faceDir.path, fileName);
     await imageFile.copy(filePath);
-    return filePath;
+    // Return relative path for easier access
+    return 'assets/face_images/$fileName';
   }
 
   Future<String> generateNewId() async {
@@ -202,6 +169,142 @@ class UserService {
       return true;
     }
     return false;
+  }
+
+  List<double> extractFaceFeatures(Face face, int width, int height) {
+    final boundingBox = face.boundingBox;
+    return [
+      boundingBox.left / width,
+      boundingBox.top / height,
+      boundingBox.width / width,
+      boundingBox.height / height,
+      (face.headEulerAngleX ?? 0.0) / 180.0 + 0.5,
+      (face.headEulerAngleY ?? 0.0) / 180.0 + 0.5,
+      (face.headEulerAngleZ ?? 0.0) / 180.0 + 0.5,
+      face.leftEyeOpenProbability ?? 0.0,
+      face.rightEyeOpenProbability ?? 0.0,
+      face.smilingProbability ?? 0.0,
+    ];
+  }
+
+  double calculateFaceSimilarity(
+    List<double> features1,
+    List<double> features2,
+  ) {
+    if (features1.length != features2.length) return 0.0;
+    double dot = 0.0, norm1 = 0.0, norm2 = 0.0;
+    for (int i = 0; i < features1.length; i++) {
+      dot += features1[i] * features2[i];
+      norm1 += features1[i] * features1[i];
+      norm2 += features2[i] * features2[i];
+    }
+    if (norm1 == 0.0 || norm2 == 0.0) return 0.0;
+    return dot / (sqrt(norm1) * sqrt(norm2));
+  }
+
+  Future<List<Attendance>> loadAttendances() async {
+    final prefs = await SharedPreferences.getInstance();
+    final attendancesJson = prefs.getString('attendances');
+    if (attendancesJson != null) {
+      final List<dynamic> jsonList = json.decode(attendancesJson);
+      return jsonList.map((json) => Attendance.fromJson(json)).toList();
+    }
+    return [];
+  }
+
+  Future<void> saveAttendances(List<Attendance> attendances) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = attendances.map((a) => a.toJson()).toList();
+    final contents = json.encode(jsonList);
+    await prefs.setString('attendances', contents);
+  }
+
+  Future<String> saveAttendanceImage(
+    String userId,
+    String type,
+    File imageFile,
+  ) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final attendanceDir = Directory(
+      path.join(directory.path, 'attendance_images'),
+    );
+    if (!await attendanceDir.exists()) {
+      await attendanceDir.create(recursive: true);
+    }
+    final timestamp = DateTime.now().millisecondsSinceEpoch;
+    final fileName = '${userId}_${type}_$timestamp.jpg';
+    final filePath = path.join(attendanceDir.path, fileName);
+    await imageFile.copy(filePath);
+    return filePath;
+  }
+
+  Future<void> recordAttendance(
+    String userId,
+    String type,
+    File imageFile,
+  ) async {
+    final attendances = await loadAttendances();
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
+    // Find existing attendance for today
+    Attendance? existing = attendances.firstWhere(
+      (a) => a.userId == userId && a.date == today,
+      orElse: () => Attendance(userId: userId, date: today),
+    );
+
+    if (!attendances.contains(existing)) {
+      attendances.add(existing);
+    }
+
+    final imagePath = await saveAttendanceImage(userId, type, imageFile);
+
+    switch (type) {
+      case 'checkIn':
+        existing = existing.copyWith(
+          checkInTime: timeStr,
+          checkInImage: imagePath,
+        );
+        break;
+      case 'break':
+        existing = existing.copyWith(breakTime: timeStr, breakImage: imagePath);
+        break;
+      case 'return':
+        existing = existing.copyWith(
+          returnTime: timeStr,
+          returnImage: imagePath,
+        );
+        break;
+      case 'checkOut':
+        existing = existing.copyWith(
+          checkOutTime: timeStr,
+          checkOutImage: imagePath,
+        );
+        break;
+    }
+
+    // Update the list
+    final index = attendances.indexWhere(
+      (a) => a.userId == userId && a.date == today,
+    );
+    attendances[index] = existing;
+
+    await saveAttendances(attendances);
+  }
+
+  Future<Attendance?> getTodayAttendance(String userId) async {
+    final attendances = await loadAttendances();
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    return attendances.firstWhere(
+      (a) => a.userId == userId && a.date == today,
+      orElse: () => Attendance(userId: userId, date: today),
+    );
   }
 
   String _generateCode() {

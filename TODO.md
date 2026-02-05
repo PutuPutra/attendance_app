@@ -1,2 +1,11 @@
-- [x] Fix default font style in settings_screen.dart to 'app' for consistency
-- [x] Test the font change by running the app
+- [x] Add \_livenessVerified variable
+- [x] Modify \_detectHeadMovement to only check left turn
+- [x] Reset liveness flags in \_detectFaces for recognition
+- [x] Modify \_startImageStream for realtime liveness detection
+- [x] Update UI status for liveness
+- [x] Update button enable logic and labels
+- [x] Remove liveness check from \_detectFaces recognition
+- [x] Adjust face quality check to allow larger yaw
+- [x] Change processing frequency to every 2 frames
+- [x] Change liveness to eye blink detection
+- [x] Update status text for blinking

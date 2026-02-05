@@ -13,6 +13,8 @@
   "settingsTitle": "Settings",
   "changePassword": "Change Password",
   "faceSaved": "Face Saved",
+  "noFaceDataSaved": "No face data saved.",
+  "faceFeaturesCount": "Face features: {count} values",
   "getPersonalFaceData": "Get Personal Face Data",
   "clearAllFaceData": "Clear All Face Data",
   "language": "Language",
@@ -127,5 +129,23 @@
   "startLabel": "Start: ",
   "endLabel": "End: ",
   "pleaseSelectBothDates": "Please select both start and end dates",
-  "apply": "Apply"
+  "apply": "Apply",
+  "lookStraight": "Look straight at the camera",
+  "turnRight": "Turn your head to the right",
+  "turnLeft": "Turn your head to the left",
+  "lookDown": "Look down",
+  "lookUp": "Look up",
+  "positionCorrect": "Position correct, capturing...",
+  "enterFaceName": "Enter a name for this face",
+  "faceName": "Face Name",
+  "save": "Save",
+  "belumWaktunya": "It's not time yet for {type}",
+  "@belumWaktunya": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "proceedAnyway": "Proceed Anyway"
 }

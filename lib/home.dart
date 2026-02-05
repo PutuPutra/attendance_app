@@ -12,6 +12,7 @@ import 'user_management_screen.dart';
 import 'all_employee_history_screen.dart';
 import 'l10n/app_localizations.dart';
 import '../models/user.dart';
+import '../models/attendance.dart';
 import '../services/user_service.dart';
 import 'blocs/settings/settings_bloc.dart';
 import 'blocs/settings/settings_state.dart';
@@ -46,10 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
   String _adminDateFilter = 'Last 7 days';
   String _userManagementAction = 'View Users';
   List<Map<String, dynamic>> _employeeHistory = [];
+  Attendance? _todayAttendance;
+  User? _currentUser;
+  bool _hasFaceData = false;
 
   @override
   void initState() {
     super.initState();
+    _currentUser = widget.currentUser;
     _updateActivityTimestamp();
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       setState(() {});
@@ -57,6 +62,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (widget.currentUser.role == 'admin') {
       _loadAllUsers();
     }
+    _loadTodayAttendance();
+    _loadUserData();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       final justReset = prefs.getBool('just_reset_password') ?? false;
@@ -148,6 +155,29 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {});
   }
 
+  Future<void> _loadTodayAttendance() async {
+    final userService = UserService();
+    _todayAttendance = await userService.getTodayAttendance(
+      widget.currentUser.id,
+    );
+    setState(() {});
+  }
+
+  Future<void> _loadUserData() async {
+    final userService = UserService();
+    final users = await userService.loadUsers();
+    final currentUser = users.firstWhere(
+      (u) => u.id == widget.currentUser.id,
+      orElse: () => widget.currentUser,
+    );
+    setState(() {
+      _currentUser = currentUser;
+      _hasFaceData =
+          currentUser.faceImagePath != null &&
+          currentUser.faceEmbeddings != null;
+    });
+  }
+
   Future<void> _updateActivityTimestamp() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt('last_activity', DateTime.now().millisecondsSinceEpoch);
@@ -235,7 +265,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             builder: (_) =>
                                 SettingsScreen(currentUser: widget.currentUser),
                           ),
-                        );
+                        ).then((_) {
+                          _loadUserData();
+                        });
                       },
                     ),
                     IconButton(
@@ -310,44 +342,72 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        GridView.count(
-                          crossAxisCount: 2,
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          childAspectRatio:
-                              4.0, // Make buttons slimmer (wider than tall)
-                          mainAxisSpacing: 8.0 * scale,
-                          crossAxisSpacing: 8.0 * scale,
-                          children: [
-                            _buildButton(
-                              context,
-                              localizations.checkIn,
-                              Colors.blue,
+                        if (_hasFaceData)
+                          GridView.count(
+                            crossAxisCount: 2,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            childAspectRatio:
+                                4.0, // Make buttons slimmer (wider than tall)
+                            mainAxisSpacing: 8.0 * scale,
+                            crossAxisSpacing: 8.0 * scale,
+                            children: [
+                              _buildButton(
+                                context,
+                                localizations.checkIn,
+                                Colors.blue,
+                              ),
+                              _buildButton(
+                                context,
+                                localizations.breakTime,
+                                Colors.blue,
+                              ),
+                              _buildButton(
+                                context,
+                                localizations.returnToWork,
+                                Colors.blue,
+                              ),
+                              _buildButton(
+                                context,
+                                localizations.checkOut,
+                                Colors.blue,
+                              ),
+                            ],
+                          )
+                        else
+                          ElevatedButton(
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FaceScanScreen(
+                                    type: 'register',
+                                    cameras: widget.cameras,
+                                    currentUser: widget.currentUser,
+                                  ),
+                                ),
+                              ).then((_) {
+                                _loadUserData();
+                                _loadTodayAttendance();
+                              });
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              minimumSize: const Size(double.infinity, 50),
                             ),
-                            _buildButton(
-                              context,
-                              localizations.breakTime,
-                              Colors.blue,
-                            ),
-                            _buildButton(
-                              context,
-                              localizations.returnToWork,
-                              Colors.blue,
-                            ),
-                            _buildButton(
-                              context,
-                              localizations.checkOut,
-                              Colors.blue,
-                            ),
-                          ],
-                        ),
+                            child: const Text('Register Face'),
+                          ),
                       ],
                     ),
                   ),
                 ),
                 //akhir nya disini juga belum responsif
               ),
-              if (widget.currentUser.role == 'admin')
+              if ((_currentUser ?? widget.currentUser).role == 'admin')
                 Expanded(
                   child: SingleChildScrollView(
                     child: Column(
@@ -374,7 +434,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         context,
                                         MaterialPageRoute(
                                           builder: (_) => UserManagementScreen(
-                                            currentUser: widget.currentUser,
+                                            currentUser:
+                                                _currentUser ??
+                                                widget.currentUser,
                                           ),
                                         ),
                                       );
@@ -453,13 +515,20 @@ class _HomeScreenState extends State<HomeScreen> {
                             ],
                           ),
                         ),
-                        AttendanceHistoryWidget(isScrollable: true),
+                        AttendanceHistoryWidget(
+                          isScrollable: true,
+                          currentUser: _currentUser ?? widget.currentUser,
+                        ),
                       ],
                     ),
                   ),
                 )
               else
-                Expanded(child: AttendanceHistoryWidget()),
+                Expanded(
+                  child: AttendanceHistoryWidget(
+                    currentUser: _currentUser ?? widget.currentUser,
+                  ),
+                ),
             ],
           ),
         ],
@@ -468,31 +537,111 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildButton(BuildContext context, String label, Color color) {
+    final localizations = AppLocalizations.of(context)!;
     final screenWidth = MediaQuery.of(context).size.width;
     final buttonSize =
         screenWidth * 0.18; // Adjust as needed for responsiveness
+
+    // Map labels to types
+    String type;
+    bool isAlreadyDone = false;
+    bool isEarly = false;
+    final now = DateTime.now();
+
+    if (label == localizations.checkIn) {
+      type = 'checkIn';
+      isAlreadyDone = _todayAttendance?.checkInTime != null;
+    } else if (label == localizations.breakTime) {
+      type = 'break';
+      isAlreadyDone = _todayAttendance?.breakTime != null;
+      isEarly = now.hour < 12;
+    } else if (label == localizations.returnToWork) {
+      type = 'return';
+      isAlreadyDone = _todayAttendance?.returnTime != null;
+      isEarly = now.hour < 13;
+    } else if (label == localizations.checkOut) {
+      type = 'checkOut';
+      isAlreadyDone = _todayAttendance?.checkOutTime != null;
+      isEarly = now.hour < 17;
+    } else {
+      type = label;
+    }
+
     return ElevatedButton(
-      onPressed: () async {
-        await _updateActivityTimestamp();
-        // Navigate to FaceScanScreen based on label
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => FaceScanScreen(
-              type: label,
-              cameras: widget.cameras,
-              currentUser: widget.currentUser,
-            ),
-          ),
-        );
-      },
+      onPressed: isAlreadyDone
+          ? null
+          : () async {
+              await _updateActivityTimestamp();
+
+              // Check time
+              if (isEarly) {
+                _showEarlyModal(context, label, () {
+                  // Proceed
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => FaceScanScreen(
+                        type: type,
+                        cameras: widget.cameras,
+                        currentUser: widget.currentUser,
+                      ),
+                    ),
+                  ).then((_) {
+                    _loadTodayAttendance();
+                  });
+                });
+                return;
+              }
+
+              // Navigate to FaceScanScreen for recognition
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FaceScanScreen(
+                    type: type,
+                    cameras: widget.cameras,
+                    currentUser: widget.currentUser,
+                  ),
+                ),
+              ).then((_) {
+                _loadTodayAttendance();
+              });
+            },
       style: ElevatedButton.styleFrom(
-        backgroundColor: color,
+        backgroundColor: isAlreadyDone ? Colors.grey : color,
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         minimumSize: const Size(double.infinity, double.infinity),
       ),
       child: Text(label),
+    );
+  }
+
+  void _showEarlyModal(
+    BuildContext context,
+    String type,
+    VoidCallback onProceed,
+  ) {
+    final localizations = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(localizations.belumWaktunya(type)),
+        content: Text('Apakah Anda ingin melanjutkan?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(localizations.cancel),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+              onProceed();
+            },
+            child: Text(localizations.proceedAnyway),
+          ),
+        ],
+      ),
     );
   }
 }
